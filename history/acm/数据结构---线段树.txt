@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+using namespace std;
+const int maxn = 50010;
+int arr[maxn];
+struct node {
+    int l, r;
+    int lazy;
+    int sum;
+} segTree[maxn * 4]; // 4倍大小
+void init() { // 初始化，很重要
+    memset(segTree, 0, sizeof(segTree));
+}
+void build(int cur, int l, int r) {
+    segTree[cur].l = l;
+    segTree[cur].r = r;
+    if (l == r) {
+        segTree[cur].sum = arr[l];
+        return;
+    }
+    int mid = (l + r) >> 1;
+    build(cur << 1, l, mid);
+    build(cur << 1 | 1, mid + 1, r);
+    segTree[cur].sum = segTree[cur << 1].sum + segTree[cur << 1 | 1].sum;
+}
+void push_up(int cur, int v) {
+    segTree[cur].sum += (segTree[cur].r - segTree[cur].l + 1) * v;
+    segTree[cur].lazy += v;
+}
+void push_down(int cur) {
+    if (segTree[cur].l == segTree[cur].r) return;
+    push_up(cur << 1, segTree[cur].lazy);
+    push_up(cur << 1 | 1, segTree[cur].lazy);
+    segTree[cur].lazy = 0;
+}
+void add(int cur, int l, int r, int v) {
+    if (segTree[cur].l >= l && segTree[cur].r <= r) {
+        push_up(cur, v);
+        return;
+    }
+    push_down(cur); // 有必要吗？？ 有必要。。。
+    int mid = (segTree[cur].l + segTree[cur].r) >> 1;
+    if (mid >= l) add(cur << 1, l, r, v);
+    if (mid < r) add(cur << 1 | 1, l, r, v);
+    segTree[cur].sum = segTree[cur << 1].sum + segTree[cur << 1 | 1].sum;
+}
+int query(int cur, int l, int r) {
+    if (segTree[cur].l == l && segTree[cur].r == r) return segTree[cur].sum;
+    push_down(cur);
+    int mid = (segTree[cur].l + segTree[cur].r) >> 1;
+    if (r <= mid) return query(cur << 1, l, r);
+    else if (l > mid) return query(cur << 1 | 1, l, r);
+    else return query(cur << 1, l, mid) + query(cur << 1 | 1, mid + 1, r);
+}
+
+
+
+int main() {
+	freopen("in.txt", "r", stdin);
+	int T, n, a, b, rnd = 1; scanf("%d", &T);
+	char str[10];
+	while (T--) {
+        init();
+		scanf("%d", &n);
+		for (int i = 1; i <= n; i++) {
+			scanf("%d", &arr[i]);		// 下标从1开始。
+		}
+		build(1, 1, n);
+		printf("Case %d:\n", rnd++);
+		while(~scanf(" %s", str) && str[0] != 'E') {	
+			scanf("%d%d", &a, &b);
+			if (str[0] == 'A') add(1, a, a, b);
+			if (str[0] == 'S') add(1, a, a, -b);
+			if (str[0] == 'Q') printf("%d\n", query(1, a, b)); // 这里求取的是区间和。
+		}
+	}
+	return 0;
+}

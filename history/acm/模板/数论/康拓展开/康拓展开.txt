@@ -1,0 +1,55 @@
+const int MAX_SIZE = 10;  
+int fac[MAX_SIZE + 1];  
+  
+//计算 MAX_SIZE 的阶乘  
+void getFactorial()  
+{  
+    int i;  
+    fac[0] = 1;  
+    for(i = 1; i <= MAX_SIZE; i++){  
+        fac[i] = i*fac[i - 1];  
+    }  
+}  
+  
+//康托逆展开：  
+//in为输入的数，ans为得到的排列.  
+void getArray(int in, int ans[])  
+{  
+//k用来保存剩下的数中当前第numOfMin + 1个数是多少。  
+//numOfMin表示在全部数中有几个数比当前数小。  
+//showed表示第几个数是否出现过。  
+  
+    int i, j, numOfMin, k;  
+    bool showed[MAX_SIZE + 1] = {0};  
+  
+    in--;  
+    for(i = 0; i < MAX_SIZE; i++){  
+        numOfMin = in / fac[MAX_SIZE - 1 - i];  
+        in = in % fac[MAX_SIZE - 1 - i];  
+        for(j = 0, k = 0; j <= numOfMin; k++)  
+                if(!showed[k])  
+                    j++;  
+  
+        k--;  
+        ans[i] = k;  
+        showed[ans[i]] = true;  
+    }  
+}  
+  
+//康托展开:  
+void getNumber(int &ans, int in[])  
+{  
+    int i, j, numOfMin;  
+  
+    ans = 0;  
+  
+    for(i = 0; i < MAX_SIZE - 1; i++){  
+        numOfMin = 0;  
+        for(j = i + 1; j < MAX_SIZE; j++){  
+            if(in[i] > in[j])  
+                numOfMin++;  
+        }  
+        ans += numOfMin*fac[MAX_SIZE - i - 1];  
+    }  
+    ans++;  
+}

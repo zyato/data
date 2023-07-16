@@ -1,0 +1,96 @@
+#include <stack>
+#include <queue>
+#include <vector>
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+#define ll long long
+#define ull unsigned long long
+#define cls(x) memset(x,0,sizeof(x))
+#define clslow(x) memset(x,-1,sizeof(x))
+
+const int mod=1e9+7;
+const int maxn=1e6+100;
+const int inf=0x3f3f3f3f;
+
+ll inv[maxn];
+stack<int>st;
+
+struct Tree {
+    int sz,val;
+    int l,r,fa;
+};
+Tree t[maxn];
+
+void init(int n)
+{
+    while(!st.empty())  st.pop();
+    for(int i=0;i<=n;i++){
+        t[i].l=t[i].r=t[i].fa=t[i].val=t[i].sz=0;
+    }
+    t[0].val=inf;
+    st.push(0);
+}
+
+//建立一颗笛卡尔树
+void build(int n)
+{
+    for(int i=1;i<=n;i++){
+        while(!st.empty()&&t[st.top()].val<t[i].val)    st.pop();
+        int fa=st.top();
+        t[i].fa=fa;
+        t[i].l=t[fa].r;
+        t[t[fa].r].fa=i;
+        t[fa].r=i;
+        st.push(i);
+    }
+}
+
+//求每一个子树的大小
+void dfs(int u)
+{
+    if(u==0)    return;
+    t[u].sz=1;
+    dfs(t[u].l);
+    dfs(t[u].r);
+    t[u].sz+=t[t[u].l].sz+t[t[u].r].sz;
+}
+
+//求1~maxn所有数的逆元
+void  getInv()
+{
+    inv[1]=1;
+    for(int i=2;i<maxn;i++){
+        inv[i]=(mod-mod/i)*inv[mod%i]%mod;
+    }
+}
+
+int main()
+{
+//    freopen("in.txt","r",stdin);
+    int n,T;
+    getInv();
+    scanf("%d",&T);
+    while(T--)
+    {
+        scanf("%d",&n);
+        init(n);
+        for(int i=1;i<=n;i++){
+            scanf("%d",&t[i].val);
+        }
+
+        build(n);
+        dfs(t[0].r);
+        ll ans=n*inv[2]%mod;
+        for(int i=1;i<=n;i++){
+            ans=ans*inv[t[i].sz]%mod;
+        }
+
+        printf("%lld\n",ans);
+    }
+    return 0;
+}

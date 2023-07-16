@@ -1,0 +1,54 @@
+namespace IntervalTree {
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    ll add[maxn<<2],sum[maxn<<2];
+    void PushUp(int rt)
+    {
+        sum[rt]=sum[rt<<1]+sum[rt<<1|1];
+    }
+    void PushDown(int m,int rt)
+    {
+        if(add[rt]){
+            add[rt<<1]+=add[rt];
+            add[rt<<1|1]+=add[rt];
+            sum[rt<<1]+=(m-(m>>1))*add[rt];
+            sum[rt<<1|1]+=(m>>1)*add[rt];
+            add[rt]=0;
+        }
+    }
+    void build(int l,int r,int rt)
+    {
+        add[rt]=0;
+        sum[rt]=0;
+        if(l==r)    return;
+        int m=(l+r)>>1;
+        build(lson);
+        build(rson);
+        PushUp(rt);
+    }
+    void update(int L,int R,int c,int l,int r,int rt)
+    {
+        if(L<=l&&r<=R){
+            add[rt]+=c;
+            sum[rt]+=c*(r-l+1);
+            return;
+        }
+        PushDown(r-l+1,rt);
+        int m=(l+r)>>1;
+        if(L<=m)    update(L,R,c,lson);
+        if(R>m)     update(L,R,c,rson);
+        PushUp(rt);
+    }
+    ll query(int L,int R,int l,int r,int rt)
+    {
+        if(L<=l&&r<=R){
+            return sum[rt];
+        }
+        PushDown(r-l+1,rt);
+        ll ans=0;
+        int m=(l+r)>>1;
+        if(L<=m)    ans+=query(L,R,lson);
+        if(R>m)     ans+=query(L,R,rson);
+        return ans;
+    }
+}

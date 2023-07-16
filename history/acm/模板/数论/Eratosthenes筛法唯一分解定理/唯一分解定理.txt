@@ -1,0 +1,72 @@
+#include <vector>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+typedef unsigned long long LL;
+const LL maxn=10000;
+vector<LL>ans;
+vector<LL>num;
+vector<LL>prime;
+bool visit[maxn+100];
+
+void print_prime()
+{
+    for(LL i=0;i<(LL)prime.size();i++){
+        printf("%I64d ",prime[i]);
+    }
+    printf("\n");
+}
+
+void print_break()
+{
+    for(LL i=0;i<(LL)num.size();i++){
+        printf("%I64d %I64d\n",ans[i],num[i]);
+    }
+}
+
+void init()
+{
+    num.clear();prime.clear();
+    for(LL i=2;i<maxn;i++){
+        for(LL j=i*i;j<=maxn&&!visit[i];j+=i){
+            visit[j]=1;
+        }
+    }
+    for(LL i=2;i<=maxn;i++){
+        if(!visit[i]){
+            prime.push_back(i);
+        }
+    }
+}
+
+void Break(LL n)
+{
+    ans.clear();num.clear();
+    for(LL i=0;i<(int)prime.size()&&prime[i]<=n;i++){
+        LL cnt=0;
+        while(n%prime[i]==0){
+            cnt++;
+            n/=prime[i];
+        }
+        if(cnt){
+            ans.push_back(prime[i]);
+            num.push_back(cnt);
+        }
+    }
+    if(n>1){
+        ans.push_back(n);
+        num.push_back(1);
+    }
+    //print_break();
+}
+
+int main()
+{
+    //freopen("in.txt","r",stdin);
+    //freopen("out.txt","w",stdout);
+
+    return 0;
+}

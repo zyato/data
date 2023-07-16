@@ -1,0 +1,106 @@
+#include <set>
+#include <queue>
+#include <vector>
+#include <math.h>
+#include <string>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+#define ll long long
+#define ull unsigned long long
+#define cls(x) memset(x,0,sizeof(x))
+#define clslow(x) memset(x,-1,sizeof(x))
+
+const int mod=1e9+7;
+const int maxn=1e5+100;
+const int MatrixSize=3;
+
+int a,b,c,d,p,n,T;
+
+struct Matrix{
+    ll mat[10][10];
+
+    Matrix operator *(Matrix a)
+    {
+        Matrix res;
+        for(int i=0;i<MatrixSize;i++){
+            for(int j=0;j<MatrixSize;j++){
+                res.mat[i][j]=0;
+                for(int k=0;k<MatrixSize;k++){
+                    res.mat[i][j]=(res.mat[i][j]+mat[i][k]*a.mat[k][j])%mod;
+                }
+            }
+        }
+        return res;
+    }
+
+    void show()
+    {
+        for(int i=0;i<MatrixSize;i++){
+            for(int j=0;j<MatrixSize;j++){
+                printf("%d ",mat[i][j]);
+            }
+            printf("\n");
+        }
+        printf("#################\n");
+    }
+};
+Matrix ans,temp,res;
+
+void init(ll a1,ll a2,ll x)
+{
+    cls(temp.mat);
+    temp.mat[0][0]=d%mod;
+    temp.mat[1][0]=c%mod;
+    temp.mat[0][1]=1;
+    temp.mat[2][2]=1;
+    temp.mat[2][0]=x;
+
+    cls(ans.mat);
+    ans.mat[0][0]=a1%mod;
+    ans.mat[0][1]=a2%mod;
+    ans.mat[0][2]=1;
+}
+
+Matrix poww(Matrix ans,int k)
+{
+    while(k)
+    {
+        if(k&1) ans=ans*temp;
+        temp=temp*temp;
+        k>>=1;
+    }
+    return ans;
+}
+
+int main()
+{
+    #ifndef ONLINE_JUDGE
+        freopen("in.txt","r",stdin);
+    #endif
+    scanf("%d",&T);
+    while(T--)
+    {
+        scanf("%d %d %d %d %d %d",&a,&b,&c,&d,&p,&n);
+
+        if(n<=2){
+            if(n==1)    printf("%lld\n",a%mod);
+            else if(n==2)   printf("%lld\n",b%mod);
+            continue;
+        }
+
+        res.mat[0][0]=b%mod;
+        res.mat[0][1]=a%mod;
+        for(int i=3;i<=n;){
+            ll j=(p/i==0?n:min(n,p/(p/i)));
+            init(res.mat[0][0],res.mat[0][1],p/i);
+            res=poww(ans,j-i+1);
+            i=j+1;
+        }
+        printf("%lld\n",res.mat[0][0]);
+    }
+    return 0;
+}

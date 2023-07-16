@@ -1,0 +1,50 @@
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+int trie[400001][26],len,root,tot,sum[400001];
+bool p;
+int n,m; 
+char s[11];
+void insert()
+{
+    len=strlen(s);
+    root=0;
+    for(int i=0;i<len;i++)
+    {
+        int id=s[i]-'a';
+        if(!trie[root][id]) trie[root][id]=++tot;
+        sum[trie[root][id]]++;//前缀后移一个位置保存 
+        root=trie[root][id];
+    }
+}
+int search()
+{
+    root=0;
+    len=strlen(s);
+    for(int i=0;i<len;i++)
+    {
+        int id=s[i]-'a';
+        if(!trie[root][id]) return 0;
+        root=trie[root][id];
+    }//root经过此循环后变成前缀最后一个字母所在位置的后一个位置 
+    return sum[root];//因为前缀后移了一个保存，所以此时的sum[root]就是要求的前缀出现的次数 
+}
+int main()
+{
+    scanf("%d",&n);
+    for(int i=1;i<=n;i++)
+    {
+        cin>>s;
+        insert();
+    }
+    scanf("%d",&m);
+    for(int i=1;i<=m;i++)
+    {
+        cin>s;
+        printf("%d\n",search());
+    }
+}
+
+数组模拟

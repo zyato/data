@@ -1,0 +1,28 @@
+#include<cstdio>  
+#include<algorithm>  
+#include<cmath>  
+#include<cstring>  
+#include<iostream>  
+using namespace std;  
+const int L=1000005,inf=1<<30,maxn=1005;  
+int prime[L];  
+bool is[L];  
+void getPrime()  
+{  
+    fill(is,is+L,1);  
+    is[1]=0;  
+    int np=0;  
+    for(int i=2;i<L;i++)  
+        if(is[i])  
+        {  
+            prime[++np]=i;  
+            for(int j=2*i;j<L;j+=i) is[j]=0;  
+        }  
+   // for(int i=1;i<=np;i++)  
+        //cout<<prime[i]<<" ";  
+}  
+int main()  
+{  
+    getPrime();  
+    return 0;  
+}  

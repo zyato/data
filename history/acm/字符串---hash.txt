@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef unsigned long long ull;
+
+const int maxn = 1e5 + 10;
+const ull hs_p = 31;//进制，一个素数。
+const ull mod = 1610612741;//大素数，用于hs_hs值的取模，ull自然取模（ULLONG_MAX - 1）
+
+ull hs_pn[maxn], hs_hs[maxn];
+
+void init(){ //存储hs_p的n次方
+	hs_pn[0] = 1;
+	for (int i = 1; i < maxn; i++)
+		hs_pn[i] = hs_pn[i - 1] * hs_p;
+}
+ull get_hash(int st, int len) { //取子集（string.substr(st, len)）的hash值
+	if (st == 0)return hs_hs[st + len - 1];
+	return hs_hs[st + len - 1] - hs_hs[st - 1] * hs_pn[len];
+}
+void get_hash(string s, int len) { //原始字符串的hash值
+	hs_hs[0] = s[0] - 'a' + 1;//防止ab和aab的hash值相同；不能写成s[0] - 'a';
+	for (int i = 1; i < len; i++) {
+		hs_hs[i] = (hs_hs[i - 1] * hs_p + s[i] - 'a' + 1);
+	}
+}
+
+
+int main() {
+	int m, l;
+	string s;
+	init();
+	map<ull, int> M;
+	while (cin >> m >> l) {
+		cin >> s;
+		get_hash(s, s.length());
+		int end = s.length() - m * l;
+		int cnt = 0;
+		for (int i = 0; i < l && i <= end; i++) {
+			M.clear();
+			for (int j = 0; j < m; j++) {
+				M[get_hash(i + j * l, l)]++;
+			}
+			if (M.size() == m)cnt++;
+			for (int j = i; j + m * l + l <= s.length(); j += l) {
+				ull x = get_hash(j, l);
+				ull y = get_hash(j + m * l, l);
+				if (M[x] == 1)M.erase(x);
+				else M[x]--;
+				M[y]++;
+				if (M.size() == m)cnt++;
+			}
+		}
+		cout << cnt << endl;
+	}
+
+	return 0;
+}

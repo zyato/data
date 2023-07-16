@@ -1,0 +1,62 @@
+#include <cmath>
+#include <vector>
+#include <string>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+typedef long long LL;
+const LL maxn=1e7;
+vector<LL>ans;
+vector<LL>num;
+vector<LL>prime;
+bool visit[maxn+100];
+
+void print_prime()
+{
+    for(LL i=0;i<(LL)prime.size();i++){
+        cout<<prime[i]<<" ";
+    }
+    cout<<endl;
+}
+
+void print_break()
+{
+    for(LL i=0;i<(LL)num.size();i++){
+        cout<<ans[i]<<" "<<num[i]<<endl;
+    }
+}
+
+int main()
+{
+    //freopen("in.txt","r",stdin);
+    //freopen("out.txt","w",stdout);
+    LL n;
+    num.clear();prime.clear();
+    for(LL i=2;i<=maxn;i++){
+        for(LL j=i*i;j<=maxn&&!visit[i];j+=i){
+            visit[j]=1;
+        }
+    }
+    for(LL i=2;i<=maxn;i++){
+        if(!visit[i]){
+            prime.push_back(i);
+        }
+    }
+    //print_prime();
+    cin>>n;
+    for(LL i=0;prime[i]<=n;i++){
+        LL cnt=0;
+        while(n%prime[i]==0){
+            cnt++;
+            n/=prime[i];
+        }
+        if(cnt){
+            ans.push_back(prime[i]);
+            num.push_back(cnt);
+        }
+    }
+    print_break();
+    return 0;
+}

@@ -1,0 +1,75 @@
+#include <set>
+#include <queue>
+#include <vector>
+#include <math.h>
+#include <string>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+#define ll long long
+#define ull unsigned long long
+#define cls(x) memset(x,0,sizeof(x))
+#define clslow(x) memset(x,-1,sizeof(x))
+
+//Miller-Rabin测试,时间复杂度O(logn)
+
+ll mul_mod(ll a, ll x, ll n) {
+    ll t = 0;
+    while(x) {
+        if(x & 1) {
+            t += a;
+            if(t >= n) t -= n;
+        }
+        a <<= 1;
+        if(a >= n) a -= n;
+        x >>= 1;
+    }
+    return t;
+}
+
+//直接的快速幂取模在数据很大的时候有平方,
+//这个平方long long都会存不下,所以需要乘法快速幂
+ll pow_mod(ll a, ll x, ll n) {
+    ll t = 1;
+    a %= n;
+    while(x) {
+        if(x & 1) t = mul_mod(t, a, n);
+        a = mul_mod(a, a, n);
+        x >>= 1;
+    }
+    return t;
+}
+
+bool Miller_Rabin(ll n, ll a, ll d) {
+    if(n == 2) return true;
+    if(n == a) return true;
+    if((n&1) == 0) return false;
+    while(!(d&1)) d /= 2;
+    ll t = pow_mod(a, d, n);
+    while((d != n-1) && (t != 1) && (t != n-1)) {
+        t = mul_mod(t, t, n);
+        d = d<<1;
+    }
+    return (t == n-1 || (d&1) == 1);
+}
+
+bool isPrime(ll n) {
+    if(n < 2) return false;
+    ll a[] = {2, 3, 61};
+    for(int i = 0; i <= 2; i++){
+        if(!Miller_Rabin(n, a[i], n-1)) return false;
+    }
+    return true;
+}
+
+int main()
+{
+    #ifndef ONLINE_JUDGE
+        freopen("in.txt","r",stdin);
+    #endif
+
+    return 0;
+}

@@ -1,0 +1,241 @@
+邻接矩阵建图+prim朴素算法 代码通过HDU1102
+[cpp] view plain copy
+#include<iostream>  
+using namespace std;  
+const int maxn=105,inf=1<<30;  
+int Map[maxn][maxn],vis[maxn],d[maxn];  
+int n,q,ans;  
+int prim()  
+{  
+    fill(vis,vis+maxn,0);//初始化每个点都未被加入到答案集合中  
+    fill(d,d+maxn,inf);//初始化每个顶点到答案集合的最近距离  
+    d[1]=0;//将顶点1加入到答案集合中  
+    ans=0;//最小生成树权值  
+    while(true)  
+    {  
+        int v=-1;//记录下一个将要加入答案集合的顶点  
+        for(int i=1;i<=n;i++)//贪心选取离答案集合距离最近的顶点  
+            if(!vis[i]&&(v==-1||d[i]<d[v])) v=i;  
+        if(v==-1) break;//如果顶点都访问完了，那么v必然等于-1，则退出循环，算法结束  
+        vis[v]=1;//加入答案集合  
+        if(d[v]==inf) return -1;//存在孤立点，则不存在最小生成树  
+        ans+=d[v];//加上权值  
+        for(int i=1;i<=n;i++)//更新未加入答案集合的那些顶点到答案集合的最小距离  
+            if(!vis[i]) d[i]=min(d[i],Map[v][i]);  
+    }  
+    return ans;  
+}  
+int main()  
+{  
+    while(cin>>n)  
+    {  
+        fill(&Map[0][0],&Map[maxn][0],inf);  
+        for(int i=1;i<=n;i++)  
+            for(int j=1;j<=n;j++)  
+            cin>>Map[i][j],Map[j][i]=Map[i][j];  
+        cin>>q;  
+        while(q--)  
+        {  
+            int x,y;  
+            cin>>x>>y;  
+            Map[x][y]=Map[y][x]=0;  
+        }  
+        cout<<prim()<<endl;  
+    }  
+    return 0;  
+}  
+
+邻接矩阵建图+prim堆优化算法，代码通过了HDU 1102
+[cpp] view plain copy
+#include<iostream>  
+#include<queue>  
+using namespace std;  
+const int maxn=105,inf=1<<30;  
+int Map[maxn][maxn],vis[maxn],ans,n,d[maxn];  
+struct node  
+{  
+    int v,len;//v代表当前顶点，w代表v到答案集合的最小距离  
+    friend bool operator <(node a,node b)  
+    {  
+        return a.len>b.len;  
+    }  
+};  
+int prim()  
+{  
+    priority_queue<node>q;  
+    node t;  
+    t.v=1;t.len=0;  
+    q.push(t);//初始化顶点1到答案集合的距离为0，以保证第一次一定选入顶点1到答案集合中去  
+    ans=0;  
+    fill(vis,vis+maxn,0);  
+    fill(d,d+maxn,inf);  
+    while(q.size())  
+    {  
+        t=q.top();q.pop();//取离答案集合距离最小的顶点  
+        if(vis[t.v]) continue;//如果已经在答案集合中则进行下一次的循环  
+        vis[t.v]=1;//否则取顶点t.v加入到答案集合中  
+        ans+=t.len;  
+        for(int i=1;i<=n;i++)//更新未加入答案集合的顶点到答案集合 的距离  
+        {  
+            if(!vis[i]&&Map[t.v][i]<d[i])//可以更新则入队  
+            {  
+                node next;  
+                next.v=i;  
+                next.len=Map[t.v][i];  
+                d[i]=Map[t.v][i];  
+                q.push(next);  
+            }  
+        }  
+    }  
+    return ans;  
+}  
+int main()  
+{  
+    cin.sync_with_stdio(0);  
+    while(cin>>n)  
+    {  
+        for(int i=1;i<=n;i++)  
+            for(int j=1;j<=n;j++)  
+            cin>>Map[i][j];  
+        int q;  
+        cin>>q;  
+        while(q--)  
+        {  
+            int x,y;  
+            cin>>x>>y;  
+            Map[x][y]=Map[y][x]=0;//x和y相连，那么它们之间的距离为0  
+        }  
+        cout<<prim()<<endl;  
+    }  
+    return 0;  
+}  
+
+邻接表建图+prim堆优化，代码通过了1301
+[cpp] view plain copy
+#include<iostream>  
+#include<algorithm>  
+#include<vector>  
+#include<queue>  
+#include<cstdio>  
+#include<cstring>  
+#define LL long long  
+using namespace std;  
+const int maxn=30,inf=1<<30;  
+using namespace std;  
+int d[maxn],vis[maxn];  
+struct edge  
+{  
+    int to,len;  
+    edge(int to,int len):to(to),len(len){}  
+};  
+struct node  
+{  
+    int v,dist;  
+    node(int x,int y):v(x),dist(y){}  
+    friend bool operator <(node a,node b)  
+    {  
+        return a.dist>b.dist;  
+    }  
+};  
+vector<edge>G[maxn];  
+int prim()  
+{  
+    int ans=0;  
+    fill(vis,vis+maxn,0);  
+    fill(d,d+maxn,inf);  
+    priority_queue<node>q;  
+    q.push(node(0,0));  
+    while(q.size())  
+    {  
+        node t=q.top();q.pop();  
+        if(vis[t.v]) continue;  
+        vis[t.v]=1;  
+        ans+=t.dist;  
+        for(int i=0;i<G[t.v].size();i++)  
+        {  
+            edge e=G[t.v][i];  
+            if(vis[e.to]) continue;  
+            if(e.len<d[e.to]) d[e.to]=e.len,q.push(node(e.to,e.len));  
+        }  
+    }  
+    return ans;  
+}  
+int main()  
+{  
+    int n,w,op,from,to;  
+    char s,e;  
+    while(cin>>n,n)  
+    {  
+        for(int i=0;i<=n;i++) G[i].clear();  
+        for(int i=0;i<n-1;i++)  
+        {  
+            cin>>s>>op;  
+            from=s-'A';  
+            for(int j=0;j<op;j++)  
+            {  
+                cin>>e>>w;  
+                to=e-'A';  
+                G[from].push_back(edge(to,w));  
+                G[to].push_back(edge(from,w));  
+            }  
+        }  
+        cout<<prim()<<endl;  
+    }  
+    return 0;  
+}  
+kruskal模板 通过HDU1863，
+[cpp] view plain copy
+//prim+堆优化，以九度OJ 1347为例  
+//http://ac.jobdu.com/problem.php?pid=1347  
+#include<cstdio>  
+#include<algorithm>  
+const int L=100005;  
+struct node{int s,y,w;}edge[L];  
+int Fa[L],n,m;  
+void init()//初始化并查集  
+{  
+    for(int i=0;i<=n;i++) Fa[i]=i;  
+}  
+int Find(int x)//查询属于哪个集合  
+{  
+    if(Fa[x]==x) return x;  
+    else return Fa[x]=Find(Fa[x]);  
+}  
+void unite(int x,int y)//合并x,y两个元素  
+{  
+    x=Find(x);y=Find(y);  
+    if(x==y) return ;  
+    Fa[y]=x;  
+}  
+bool same(int x,int y)//【判断是否属于同个集合  
+{  
+    return Find(x)==Find(y);  
+}  
+bool cmp(node a,node b)  
+{  
+    return a.w<b.w;  
+}  
+int main()  
+{  
+    while(~scanf("%d%d",&m,&n)&&m)  
+    {  
+        init();  
+        for(int i=0;i<m;i++)  
+            scanf("%d%d%d",&edge[i].s,&edge[i].y,&edge[i].w);  
+        std::sort(edge,edge+m,cmp);  
+        int sum=0,cnt=0;  
+        for(int i=0;i<m;i++)  
+        {  
+            if(cnt==n-1) break;  
+            if(!same(edge[i].s,edge[i].y))  
+            {  
+                unite(edge[i].s,edge[i].y);  
+                sum+=edge[i].w;  
+                cnt++;  
+            }  
+        }  
+        if(cnt!=n-1) printf("?\n");  
+        else printf("%d\n",sum);  
+    }  
+    return 0;  
+}  

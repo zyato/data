@@ -1,0 +1,141 @@
+Who Gets the Most Candies?
+Time Limit: 5000MS	 	Memory Limit: 131072K
+Total Submissions: 15080	 	Accepted: 4748
+Case Time Limit: 2000MS
+Description
+
+N children are sitting in a circle to play a game.
+
+The children are numbered from 1 to N in clockwise order. Each of them has a card with a non-zero integer on it in his/her hand. The game starts from the K-th child, who tells all the others the integer on his card and jumps out of the circle. The integer on his card tells the next child to jump out. Let A denote the integer. If A is positive, the next child will be the A-th child to the left. If A is negative, the next child will be the (?A)-th child to the right.
+
+The game lasts until all children have jumped out of the circle. During the game, the p-th child jumping out will get F(p) candies where F(p) is the number of positive integers that perfectly divide p. Who gets the most candies?
+
+Input
+
+There are several test cases in the input. Each test case starts with two integers N (0 < N ≤ 500,000) and K (1 ≤ K ≤ N) on the first line. The next N lines contains the names of the children (consisting of at most 10 letters) and the integers (non-zero with magnitudes within 108) on their cards in increasing order of the children’s numbers, a name and an integer separated by a single space in a line with no leading or trailing spaces.
+Output
+
+Output one line for each test case containing the name of the luckiest child and the number of candies he/she gets. If ties occur, always choose the child who jumps out of the circle first.
+
+Sample Input
+
+4 2
+Tom 2
+Jack 4
+Mary -1
+Sam 1
+Sample Output
+
+Sam 3
+Source
+
+POJ Monthly--2006.07.30, Sempr
+
+题目大意：现在有一些小孩按顺时针围成一个圈，每个小孩手上有一张纸片（上面有一个不为0的整数），给出一个k，代表第k个小孩首先离开这个圈，如果小孩受伤的纸片为正整数，则左边第几个离开，如果为负整数则右边第几个离开。现在定义f[i]位i的约数个数，现在按照小孩离开的顺序i分别为1到n，现在要求f[i]最大，且i最小，输出这个小孩的名字，以及f[i]值。
+
+代码分析：这个题做了好久，求小孩离开的顺序用线段树，求1到n约数最大的值用到了反素数。感觉自己水平不够，所以贴一下学习的博客吧。（这题用c++写会超时，用c就过，我也不知道为什么）
+反素数：点击打开链接   
+线段树：点击打开链接
+
+代码：
+[cpp] view plain copy
+<span style="font-size:18px;">#include <cmath>  
+#include <vector>  
+#include <string>  
+#include <stdio.h>  
+#include <string.h>  
+#include <iostream>  
+#include <algorithm>  
+using namespace std;  
+#define lson l,m,rt<<1  
+#define rson m+1,r,rt<<1|1  
+typedef unsigned long long LL;  
+const int maxn=500000;  
+int tree[maxn<<2];  
+LL ans=0,INF=~0ULL;  
+int best,n,k;  
+int p[16] = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53};  
+  
+struct Kid{  
+    int val;  
+    char name[100];  
+};  
+Kid kid[maxn];  
+  
+void PushUp(int rt)  
+{  
+    tree[rt]=tree[rt<<1]+tree[rt<<1|1];  
+}  
+  
+void build(int l,int r,int rt)  
+{  
+    if(l==r){  
+        tree[rt]=1;  
+        return;  
+    }  
+    int m=(l+r)>>1;  
+    build(lson);  
+    build(rson);  
+    PushUp(rt);  
+}  
+  
+int query(int pos,int l,int r,int rt)  
+{  
+    int ans;  
+    if(l==r){  
+        tree[rt]--;  
+        return l;  
+    }  
+    int m=(l+r)>>1;  
+    if(pos<=tree[rt<<1])    ans=query(pos,lson);  
+    else    ans=query(pos-tree[rt<<1],rson);  
+    PushUp(rt);  
+    return ans;  
+}  
+  
+void dfs(int depth,LL tmp,LL num)  
+{  
+    if(depth>=16)   return;  
+    if(num>best){  
+        best=num;  
+        ans=tmp;  
+    }  
+    if(num==best&&ans>tmp){  
+        ans=tmp;  
+    }  
+    for(int i=1;i<=63;i++){  
+        if(n/p[depth]<tmp) break;  
+        dfs(depth+1,tmp*=p[depth],num*(i+1));  
+    }  
+}  
+  
+int main()  
+{  
+    //freopen("in.txt","r",stdin);  
+    //freopen("out.txt","w",stdout);  
+    while(scanf("%d%d",&n,&k)!=EOF)  
+    {  
+        ans=INF;best=0;  
+        dfs(0,1,1);  
+        for(int i=1;i<=n;i++){  
+            scanf("%s %d",&kid[i].name,&kid[i].val);  
+        }  
+        int cnt=n;  
+        build(1,n,1);  
+        for(int i=1;i<=n;i++){  
+            cnt--;  
+            int pos=query(k,1,n,1);  
+            if(i==ans){  
+                printf("%s %d\n",kid[pos].name,best);  
+                break;  
+            }  
+            if(cnt==0)  break;  
+            if(kid[pos].val>=0){  
+                k=(k+kid[pos].val-2)%cnt+1;  
+            } else {  
+                k=((k+kid[pos].val-1)%cnt+cnt)%cnt+1;  
+            }  
+        }  
+    }  
+    return 0;  
+}</span> 

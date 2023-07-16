@@ -1,0 +1,112 @@
+
+畅通工程再续
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 32768/32768 K (Java/Others)
+Total Submission(s): 27537    Accepted Submission(s): 8941
+
+
+Problem Description
+相信大家都听说一个“百岛湖”的地方吧，百岛湖的居民生活在不同的小岛中，当他们想去其他的小岛时都要通过划小船来实现。现在政府决定大力发展百岛湖，发展首先要解决的问题当然是交通问题，政府决定实现百岛湖的全畅通！经过考察小组RPRush对百岛湖的情况充分了解后，决定在符合条件的小岛间建上桥，所谓符合条件，就是2个小岛之间的距离不能小于10米，也不能大于1000米。当然，为了节省资金，只要求实现任意2个小岛之间有路通即可。其中桥的价格为 100元/米。
+ 
+
+Input
+输入包括多组数据。输入首先包括一个整数T(T <= 200)，代表有T组数据。
+每组数据首先是一个整数C(C <= 100),代表小岛的个数，接下来是C组坐标，代表每个小岛的坐标，这些坐标都是 0 <= x, y <= 1000的整数。
+ 
+
+Output
+每组输入数据输出一行，代表建桥的最小花费，结果保留一位小数。如果无法实现工程以达到全部畅通，输出”oh!”.
+ 
+
+Sample Input
+2
+2
+10 10
+20 20
+3
+1000 1000
+1 1
+2 2
+ 
+
+Sample Output
+1414.2
+oh!
+ 
+题目大意：现有n个岛屿，给出他们的坐标，现要求任意两个岛屿之间能够联通且两个岛屿之间的桥长不得小于10米，大于1000米（单指一个桥），已知桥的价格为100元/米，若是能够联通则输出最少需花费多少钱，不能则输出oh!
+
+题目分析：首先可用数组记录下两座岛屿之间的距离，然后简单的prim算法的实现，只需要每次判断这个距离是否符合条件即可，自己写了一下，发现写起来还是比较复杂，所以最后还是记载一下大神的代码吧。
+
+代码：
+[cpp] view plain copy
+<span style="font-family:Microsoft YaHei;font-size:18px;">#include <iostream>  
+#include <cmath>  
+#include <stdio.h>  
+  
+using namespace std;  
+#define size 200  
+#define MAX  999999999  
+  
+struct island{  
+    int x,y,flag;  
+}str[size];  
+  
+int main()  
+{  
+    int T;  
+    cin>>T;  
+    while(T--)  
+    {  
+        int n,flag=1;  
+        double sum=0;  
+        double distance[size][size]={0};  
+        cin>>n;  
+        for(int i=1;i<=n;i++){  
+            cin>>str[i].x>>str[i].y;  
+            str[i].flag=0;  
+        }  
+        for(int j=1;j<=n;j++){              //计算两座岛屿之间的距离  
+            for(int k=j+1;k<=n;k++){  
+                distance[j][k]=sqrt((str[j].x-str[k].x)*(str[j].x-str[k].x)  
+                +(str[j].y-str[k].y)*(str[j].y-str[k].y));  
+                if(distance[j][k]<10||distance[j][k]>1000){  
+                    distance[j][k]=MAX;  
+                }  
+            }  
+        }  
+        str[1].flag=1;  
+        for(int i=1;i<n;i++){                 
+            double MIN=MAX;  
+            int j1,k1;  
+            for(int j=1;j<=n;j++){  
+                for(int k=j+1;k<=n;k++){  
+                    if((str[j].flag+str[k].flag==1)&&MIN>distance[j][k]){  
+                        MIN=distance[j][k];  
+                        j1=j;  
+                        k1=k;  
+                    }  
+                }  
+            }  
+            if(MIN==MAX){  
+                flag=0;  
+                break;  
+            }  
+            else{  
+                sum+=MIN;  
+                if(str[j1].flag==0){  
+                    str[j1].flag=1;  
+                }  
+                else{  
+                    str[k1].flag=1;  
+                }  
+            }  
+        }  
+        if(flag){  
+            printf("%.1lf\n",sum*100);  
+        }  
+        else{  
+            cout<<"oh!"<<endl;  
+        }  
+    }  
+    return 0;  
+}  
+</span>  

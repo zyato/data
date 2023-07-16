@@ -1,0 +1,84 @@
+/*
+spfa算法
+前向星存储图
+*/
+#include <iostream>
+#include <queue>
+#include <cstring>
+using namespace std;
+const int maxn = 1010, maxedge = 2010;
+const int inf = 0x3f3f3f3f;
+struct edge
+{
+    int to, dist, next;
+} E[maxedge << 1];
+//head[i]表示上一个以i为弧尾的结点是head[i].
+int head[maxn], dist[maxn], edgeCnt;
+bool vis[maxn];
+
+void init()
+{
+    edgeCnt = 0;
+    memset(dist, 0x3f, sizeof(dist));
+    memset(vis, 0, sizeof(0));
+    memset(head, 0, sizeof(head));
+}
+
+inline void add_edge(int a, int b, int v)
+{
+    edgeCnt++;
+    E[edgeCnt].dist = v;
+    E[edgeCnt].to = b;
+    E[edgeCnt].next = head[a]; //意思就是找到另外一个(上次加进来)边（a, x, vx）
+    head[a] = edgeCnt;
+}
+
+void spfa(int s)
+{ 
+    dist[s] = 0;
+    queue<int> q;
+    q.push(s);
+    vis[s] = true;
+    int u, v;
+    while (!q.empty())
+    {
+        u = q.front();
+        q.pop();
+        vis[u] = false;
+        for (int i = head[u]; i; i = E[i].next)
+        {
+            v = E[i].to;
+            if (dist[u] + E[i].dist < dist[v])
+            {
+                dist[v] = dist[u] + E[i].dist;
+                if (!vis[v])
+                {
+                    q.push(v);
+                    vis[v] = true;
+                }
+            }
+        }
+    }
+}
+int main()
+{
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int n, start;
+    while (cin >> n >> start)
+    {
+        int a, b, v;
+        for (int i = 0; i < n; ++i)
+        {
+            cin >> a >> b >> v;
+            add_edge(a, b, v);
+            add_edge(b, a, v);
+        }
+        init();
+        spfa(start);
+        cout << dist[1] << endl;
+    }
+
+    return 0;
+}

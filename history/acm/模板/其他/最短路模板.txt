@@ -1,0 +1,258 @@
+一下模板均已通过HDUOJ 2544
+程序设计竞赛队空间和时间复杂度要求都很高，所以朴素的Dijkstra算法无论时间还是空间，效率都很低。
+所以，一般而言，不带负权的用邻接表建图+堆优化的Dijkstra算法
+带负权的的用邻接表建图+SFPA算法
+此外，最短路还可以用BFS求，例如边权值都为1的话，就可以用普通队列+BFS求得，边权值不为1，可以用优先队列+BFS求得，这里就不给出实现代码了
+1.最短路模板题+邻接矩阵建图+朴素算法，复杂度O(V^2)
+[cpp] view plain copy
+#include<iostream>  
+#include<vector>  
+using namespace std;  
+const int maxn=105,inf=1<<29;  
+int n,m,s;  
+int vis[maxn],d[maxn],Map[maxn][maxn];  
+void Dijkstra()  
+{  
+    fill(vis,vis+maxn,0);  
+    fill(d,d+maxn,inf);  
+    d[s]=0;  
+    while(1)  
+    {  
+        int v=-1;  
+        for(int i=1;i<=n;i++)  
+            if(!vis[i]&&(v==-1||d[v]>d[i])) v=i;  
+        if(v==-1) break;  
+        vis[v]=1;  
+        for(int i=1;i<=n;i++) d[i]=min(d[i],d[v]+Map[v][i]);  
+    }  
+}  
+int main()  
+{  
+    while(cin>>n>>m,(n+m))  
+    {  
+        fill(&Map[0][0],&Map[maxn][0],inf);  
+        for(int i=0;i<m;i++)  
+        {  
+            int a,b,w;  
+            cin>>a>>b>>w;  
+            Map[a][b]=Map[b][a]=min(Map[a][b],w);  
+        }  
+        s=1;  
+        Dijkstra();  
+        cout<<d[n]<<endl;  
+    }  
+    return 0;  
+}  
+
+2.最短路模板+邻接表建图+堆优化(优先队列) 复杂度O(E*log(E))
+[cpp] view plain copy
+#include<iostream>  
+#include<queue>  
+#include<vector>  
+#include<cstdio>  
+using namespace std;  
+const int maxn=105,inf=1<<29;  
+struct edge{int to,cost;};  
+struct node  
+{  
+    int len,v;  
+    friend bool operator <(node x,node y)  
+    {  
+        return x.len>y.len;  
+    }  
+};  
+int d[maxn];  
+int n,m,s;  
+vector<edge>G[maxn];  
+void Dijkstra()  
+{  
+    priority_queue<node>q;  
+    fill(d,d+maxn,inf);d[s]=0;  
+    node t;  
+    t.len=0;t.v=s;  
+    q.push(t);  
+    while(q.size())  
+    {  
+        t=q.top();q.pop();  
+        if(d[t.v]<t.len) continue;  
+        for(int i=0;i<G[t.v].size();i++)  
+        {  
+            edge e=G[t.v][i];  
+            if(d[e.to]>d[t.v]+e.cost)  
+            {  
+                d[e.to]=d[t.v]+e.cost;  
+                node temp={d[e.to],e.to};  
+                q.push(temp);  
+            }  
+        }  
+    }  
+}  
+int main()  
+{  
+    //while(cin>>n>>m&&(n+m))  
+    while(~scanf("%d%d",&n,&m),(n+m))  
+    {  
+        for(int i=0;i<=n;i++) G[i].clear();  
+        for(int i=0;i<m;i++)  
+        {  
+            int a,b,w;  
+            edge t,rt;  
+            scanf("%d%d%d",&a,&b,&w);  
+            //cin>>a>>b>>w;  
+            t.to=b;t.cost=w;  
+            rt.to=a;rt.cost=w;  
+            G[a].push_back(t);  
+            G[b].push_back(rt);  
+        }  
+        s=1;  
+        Dijkstra();  
+        cout<<d[n]<<endl;  
+    }  
+    return 0;  
+}  
+3.最短路模板+邻接表建图+SFPA
+[cpp] view plain copy
+#include<iostream>  
+#include<queue>  
+#include<vector>  
+#include<cstdio>  
+using namespace std;  
+const int maxn=105,inf=1<<29;  
+struct edge{int to,cost;};  
+int d[maxn],vis[maxn];  
+int n,m,s;  
+vector<edge>G[maxn];  
+void SFPA()  
+{  
+    fill(d,d+maxn,inf);d[s]=0;  
+    fill(vis,vis+maxn,0);  
+    queue<int> q;  
+    q.push(s);  
+    while(!q.empty())  
+    {  
+        int u=q.front();  
+        q.pop();  
+        vis[u]=0;  
+        for(int i=0;i<G[u].size();i++)  
+        {  
+            int v=G[u][i].to,len=G[u][i].cost;  
+            if(d[v]>d[u]+len)  
+            {  
+                d[v]=d[u]+len;  
+                if(vis[v]==0)  
+                {  
+                    vis[v]=1;  
+                    q.push(v);  
+                }  
+            }  
+        }  
+    }  
+}  
+int main()  
+{  
+    //while(cin>>n>>m&&(n+m))  
+    while(~scanf("%d%d",&n,&m),(n+m))  
+    {  
+        for(int i=0;i<=n;i++) G[i].clear();  
+        for(int i=0;i<m;i++)  
+        {  
+            int a,b,w;  
+            edge t,rt;  
+            scanf("%d%d%d",&a,&b,&w);  
+            //cin>>a>>b>>w;  
+            t.to=b;t.cost=w;  
+            rt.to=a;rt.cost=w;  
+            G[a].push_back(t);  
+            G[b].push_back(rt);  
+        }  
+        s=1;  
+        SFPA();  
+        cout<<d[n]<<endl;  
+    }  
+    return 0;  
+}  
+
+4.最短路模板+floyd
+[cpp] view plain copy
+#include<iostream>  
+using namespace std;  
+const int maxn=105,inf=1<<29;  
+int n,m;  
+int Map[maxn][maxn];  
+void floyd()  
+{  
+    for(int k=1;k<=n;k++)  
+        for(int i=1;i<=n;i++)  
+            for(int j=1;j<=n;j++)  
+            Map[i][j]=min(Map[i][j],Map[i][k]+Map[k][j]);  
+}  
+int main()  
+{  
+    while(cin>>n>>m,(n+m))  
+    {  
+        fill(&Map[0][0],&Map[maxn][0],inf);  
+        for(int i=0;i<m;i++)  
+        {  
+            int a,b,w;  
+            cin>>a>>b>>w;  
+            Map[a][b]=Map[b][a]=min(Map[a][b],w);  
+        }  
+        floyd();  
+        cout<<Map[1][n]<<endl;  
+    }  
+    return 0;  
+}  
+记录路径的最短路，floyd算法实现，以HDU 1385为例
+[cpp] view plain copy
+<pre name="code" class="cpp">#include<iostream>  
+#include<cstdio>  
+using namespace std;  
+const int maxn=105,inf=1<<29;  
+int n,m;  
+int Map[maxn][maxn],p[maxn][maxn],tax[maxn];  
+void floyd()  
+{  
+    for(int k=1;k<=n;k++)  
+        for(int i=1;i<=n;i++)  
+            for(int j=1;j<=n;j++)  
+            //if(Map[i][j]>=Map[i][k]+Map[k][j]+tax[k]) Map[i][j]=Map[i][k]+Map[k][j]+tax[k],p[i][j]=min(p[i][j],p[i][k]);  
+            {  
+                int temp=Map[i][k]+Map[k][j]+tax[k];  
+                if(Map[i][j]>temp)  
+                {  
+                    Map[i][j]=temp;  
+                    p[i][j]=p[i][k];  
+                }  
+                else if(Map[i][j]==temp&&p[i][j]>p[i][k]) p[i][j]=p[i][k];  
+            }  
+}  
+int main()  
+{  
+    while(~scanf("%d",&n),n)  
+    {  
+        for(int i=1;i<=n;i++)  
+            for(int j=1;j<=n;j++)  
+            {  
+                scanf("%d",&Map[i][j]);  
+                if(Map[i][j]==-1) Map[i][j]=inf;  
+                p[i][j]=j;  
+            }  
+        for(int i=1;i<=n;i++)  scanf("%d",&tax[i]);  
+        floyd();  
+        int s,e;  
+        while(scanf("%d%d",&s,&e)&&(s+e)!=-2)  
+        {  
+            printf("From %d to %d :\n",s,e);  
+            printf("Path: ");  
+            int u = s;  
+            printf("%d",u);  
+            while(u!=e)  
+            {  
+                printf("-->%d",p[u][e]);  
+                u= p[u][e];  
+            }  
+            printf("\nTotal cost : %d\n\n", Map[s][e]);  
+        }  
+    }  
+    return 0;  
+}  

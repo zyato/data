@@ -1,0 +1,29 @@
+在N件物品取出若干件放在容量为W的背包里，每件物品的体积为W1，W2……Wn（Wi为整数），与之相
+对应的价值为P1,P2……Pn（Pi为整数）。求背包能够容纳的最大价值。
+#include <iostream>
+#include <memory.h>
+#include <stdio.h>
+
+using namespace std;
+const int Size=200;
+int main()
+{
+    //freopen("in.txt","r",stdin);
+    int N,W;
+    int w[Size],v[Size],f[Size][Size];
+    cin>>N>>W;
+    for(int i=1;i<=N;i++){
+        cin>>w[i]>>v[i];
+    }
+    memset(f,0,sizeof(f));
+    for(int i=1;i<=N;i++){
+        for(int j=W;j>=0;j--){
+            if(j>=w[i])
+                f[i][j]=max(f[i-1][j],f[i-1][j-w[i]]+v[i]);
+            else
+                f[i][j]=f[i-1][j];
+        }
+    }
+    cout<<f[N][W]<<endl;
+	return 0;
+}

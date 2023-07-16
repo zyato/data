@@ -1,0 +1,128 @@
+题意：
+
+　　有两种操作：
+
+　　　　1 a:询问是不是有连续长度为a的空房间,有的话住进最左边
+　　　　2 a b:将[a,a+b-1]的房间清空
+
+　　如果查询时没有连续长度为a的空房间，则输出0
+
+思路：
+
+　　记录区间中最长的空房间，解释看代码吧，代码有详细注释。
+
+代码：
+
+
+复制代码
+#include <map>
+#include <queue>
+#include <vector>
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+#define ll long long
+#define ull unsigned long long
+#define cls(x) memset(x,0,sizeof(x))
+#define clslow(x) memset(x,-1,sizeof(x))
+#define lson l,m,rt<<1
+#define rson m+1,r,rt<<1|1
+
+const int maxn=1e5+100;
+
+int n,m;
+
+//cover:标记数组，-1代表不需要操作，0代表将房间清空，1代表将房间占满
+//lsum[rt]:从rt节点所代表的区间的左端点向右一共有多少连续的空房间
+//rsum[rt]:从rt节点所代表的区间的右端点向左一共有多少连续的空房间
+//msum[rt]:rt节点所代表的区间最多有多少连续的空房间
+int cover[maxn<<2],lsum[maxn<<2],rsum[maxn<<2],msum[maxn<<2];
+
+void PushDown(int rt,int m)
+{
+    if(cover[rt]!=-1){
+        //根据延时标记的值相应对左子树，右子树置空，置满，同时之后要把该延时标记取消
+        cover[rt<<1]=cover[rt<<1|1]=cover[rt];
+        msum[rt<<1]=lsum[rt<<1]=rsum[rt<<1]=cover[rt]?0:m-(m>>1);
+        msum[rt<<1|1]=lsum[rt<<1|1]=rsum[rt<<1|1]=cover[rt]?0:(m>>1);
+        cover[rt]=-1;
+    }
+}
+
+void PushUp(int rt,int m)
+{
+    lsum[rt]=lsum[rt<<1];
+    rsum[rt]=rsum[rt<<1|1];
+    //如果左子树代表的区间全为空房间，则继续加上右子树左端点开始的连续的空房间
+    if(lsum[rt]==m-(m>>1))  lsum[rt]+=lsum[rt<<1|1];
+    //如果右子树代表的区间全为空房间，则继续加上左子树右端点开始的连续的空房间
+    if(rsum[rt]==(m>>1))    rsum[rt]+=rsum[rt<<1];
+    //该区间最多的空房间，要么在中间，要么在左子树，要么在右子树
+    msum[rt]=max(rsum[rt<<1]+lsum[rt<<1|1],max(msum[rt<<1],msum[rt<<1|1]));
+}
+
+void build(int l,int r,int rt)
+{
+    cover[rt]=-1;
+    msum[rt]=lsum[rt]=rsum[rt]=r-l+1;
+    if(l==r)    return;
+    int m=(l+r)>>1;
+    build(lson);
+    build(rson);
+}
+
+void update(int L,int R,int c,int l,int r,int rt)
+{
+    if(L<=l&&r<=R){
+        cover[rt]=c;
+        msum[rt]=lsum[rt]=rsum[rt]=c?0:r-l+1;
+        return;
+    }
+    PushDown(rt,r-l+1);
+    int m=(l+r)>>1;
+    if(L<=m)    update(L,R,c,lson);
+    if(R>m)     update(L,R,c,rson);
+    PushUp(rt,r-l+1);
+}
+
+int query(int w,int l,int r,int rt)
+{
+    if(l==r)    return l;
+    PushDown(rt,r-l+1);
+    int m=(l+r)>>1;
+    //左子树，中间，右子树有超过w个连续的空房间时对应进行返回
+    if(msum[rt<<1]>=w)  return query(w,lson);
+    else if(rsum[rt<<1]+lsum[rt<<1|1]>=w)   return m-rsum[rt<<1]+1;
+    return query(w,rson);
+}
+
+int main()
+{
+//    freopen("in.txt","r",stdin);
+    while(scanf("%d%d",&n,&m)!=EOF)
+    {
+        build(1,n,1);
+        for(int i=1;i<=m;i++){
+            int op,a,b;
+            scanf("%d",&op);
+            if(op==1){
+                scanf("%d",&a);
+                if(msum[1]<a)   printf("0\n");
+                else{
+                    int p=query(a,1,n,1);
+                    printf("%d\n",p);
+                    update(p,p+a-1,1,1,n,1);
+                }
+            }
+            else{
+                scanf("%d%d",&a,&b);
+                update(a,a+b-1,0,1,n,1);
+            }
+        }
+    }
+    return 0;
+}

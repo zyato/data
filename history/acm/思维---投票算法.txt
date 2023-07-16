@@ -1,0 +1,19 @@
+/**
+* 查找输入中重复出现超过一半以上(n/2)的元素（前提：一定存在这样一个元素，否则结果是不确定的。当然，如果不一定存在，仍可以用此算法，求出准答案后，遍历输入看准答案是否超过半数）
+*/
+int voteAlogrithm(vector<int> & nums){
+	int temp = nums[0];
+    int count = 1;
+	for (int i = 1; i < nums.size(); i++) {
+		if (nums[i] == temp) {
+			count++;
+		} else {
+			count--;
+		}
+		if (count == 0) {
+			temp = nums[i];
+			count = 1;
+		}
+	}
+	return temp;
+}

@@ -1,0 +1,167 @@
+1. 用STL的优先队列
+   
+[cpp] view plain copy
+#include <iostream>  
+#include <queue>  
+#include <vector>  
+using namespace std;  
+const int N=405;  
+struct rec  
+{  
+    int v,w;  
+};  
+vector<rec> edge[N*N];  
+int n,st,ed;  
+__int64 dis[N*N];  
+bool vis[N*N];  
+struct cmp  
+{  
+    bool operator()(int a,int b)  
+    {   
+        return dis[a]>dis[b];  
+    }   
+};  
+void Dijkstra()  
+{  
+    priority_queue<int,vector<int>,cmp> Q;  
+    memset(dis,-1,sizeof(dis));  
+    memset(vis,0,sizeof(vis));  
+    int i,u,v;  
+    Q.push(st);  
+    dis[st]=0;  
+    while(!Q.empty())  
+    {  
+        u=Q.top();  
+        Q.pop();  
+        vis[u]=0;  
+        if(u==ed)  
+            break;  
+        for(i=0;i<edge[u].size();i++)  
+        {  
+            v=edge[u][i].v;  
+            if(dis[v]==-1 || dis[v]>dis[u]+edge[u][i].w)  
+            {  
+                dis[v]=dis[u]+edge[u][i].w;  
+                if(!vis[v])  
+                {  
+                    vis[v]=1;  
+                    Q.push(v);  
+                }  
+            }  
+        }  
+    }  
+}  
+2.手动写堆
+[cpp] view plain copy
+#include <iostream>  
+#include <queue>  
+#include <vector>  
+using namespace std;  
+const int N=405;  
+struct rec  
+{  
+    int v,w;  
+};  
+vector<rec> edge[N*N];  
+int n,st,ed;  
+__int64 dis[N*N];  
+bool inHeap[N*N];  
+int heap[N*N];//存储节点id的堆  
+int inhp[N*N];//存储节点id在堆里面的位置  
+int size;//堆的大小  
+void upData(int x)  
+{  
+    while(x>1)  
+    {  
+        int px=x>>1;  
+        if(dis[heap[x]]<dis[heap[px]])  
+        {  
+            int temp;  
+                  
+            inhp[heap[x]]=px;  
+            inhp[heap[px]]=x;  
+                  
+            temp=heap[x];  
+            heap[x]=heap[px];  
+            heap[px]=temp;  
+                      
+            x=px;  
+        }  
+        else  
+            break;  
+    }  
+}  
+void downData(int x)  
+{  
+    int lx,rx;  
+    while(x<=size/2)  
+    {  
+        lx=x<<1;  
+        rx=lx+1;  
+        int sx=x;  
+        if(lx<=size &&dis[heap[sx]]>dis[heap[lx]])  
+        {  
+            sx=lx;  
+        }  
+        if(rx<=size &&dis[heap[sx]]>dis[heap[rx]])  
+        {  
+            sx=rx;  
+        }  
+        if(sx==x)  
+            break;  
+        inhp[heap[x]]=sx;  
+        inhp[heap[sx]]=x;  
+              
+        int temp=heap[x];  
+        heap[x]=heap[sx];  
+        heap[sx]=temp;  
+        x=sx;  
+    }  
+}  
+void Dijkstra()  
+{  
+    memset(dis,-1,sizeof(dis));  
+    memset(inHeap,0,sizeof(inHeap));  
+    size=1;  
+    heap[1]=st;  
+    inhp[st]=1;  
+    int i,u,v;  
+    dis[st]=0;  
+    while(size>0)  
+    {  
+        u=heap[1];  
+        if(u==ed)  
+        {  
+            break;  
+        }  
+        int temp;  
+        temp=heap[1];  
+        heap[1]=heap[size];  
+        heap[size]=temp;  
+        inhp[heap[1]]=1;  
+        size--;  
+        downData(1);  
+        inHeap[u]=false;  
+        for(i=0;i<edge[u].size();i++)  
+        {  
+            v=edge[u][i].v;  
+            if(dis[v]==-1 || dis[v]>dis[u]+edge[u][i].w)  
+            {  
+                dis[v]=dis[u]+edge[u][i].w;  
+                if(!inHeap[v])  
+                {  
+                    inHeap[v]=true;  
+                    size++;  
+                    heap[size]=v;  
+                    inhp[v]=size;  
+                    upData(size);  
+                }  
+                else  
+                {  
+                    upData(inhp[v]);  
+                }  
+            }  
+        }  
+    }  
+          
+}  

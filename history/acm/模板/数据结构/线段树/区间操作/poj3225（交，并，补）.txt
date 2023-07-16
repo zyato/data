@@ -1,0 +1,146 @@
+问经过若干次上述操作后，所得到的区间是什么？
+
+分析：
+
+　　我们一个一个操作来分析:(用0和1表示是否包含区间,-1表示该区间内既有包含又有不包含)
+　　　　U:把区间[l,r]覆盖成1
+　　　　I:把[-∞,l)(r,∞]覆盖成0
+　　　　D:把区间[l,r]覆盖成0
+　　　　C:把[-∞,l)(r,∞]覆盖成0 , 且[l,r]区间0/1互换
+　　　　S:[l,r]区间0/1互换
+　　成段覆盖的操作很简单,比较特殊的就是区间0/1互换这个操作,我们可以称之为异或操作，很明显我们可以知道这个性质:当一个区间被覆盖后,不管之前有没有异或标记都没有意义了，所以当一个节点得到覆盖标记时把异或标记清空。而当一个节点得到异或标记的时候,先判断覆盖标记,如果是0或1,直接改变一下覆盖标记,不然的话改变异或标记。开区间闭区间只要数字乘以2就可以处理(偶数表示端点,奇数表示两端点间的区间)。
+
+代码：
+
+
+复制代码
+#include <map>
+#include <queue>
+#include <vector>
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+#define ll long long
+#define ull unsigned long long
+#define cls(x) memset(x,0,sizeof(x))
+#define clslow(x) memset(x,-1,sizeof(x))
+#define lson l,m,rt<<1
+#define rson m+1,r,rt<<1|1
+
+const int maxn=2*1e5;
+
+bool Hash[maxn];
+int cover[maxn<<2],XOR[maxn<<2];
+
+//当一个节点得到异或标记的时候,先判断覆盖标记,如果是0或1,直接改变一下覆盖标记,不然的话改变异或标记
+void FXOR(int rt)
+{
+    if(cover[rt]!=-1)   cover[rt]^=1;
+    else                XOR[rt]^=1;
+}
+
+void PushDown(int rt)
+{
+    //当一个区间被覆盖后,不管之前有没有异或标记都没有意义
+    if(cover[rt]!=-1){
+        cover[rt<<1]=cover[rt<<1|1]=cover[rt];
+        XOR[rt<<1]=XOR[rt<<1|1]=0;
+        cover[rt]=-1;
+    }
+    if(XOR[rt]){
+        FXOR(rt<<1);
+        FXOR(rt<<1|1);
+        XOR[rt]=0;
+    }
+}
+
+void update(char op,int L,int R,int l,int r,int rt)
+{
+    if(L<=l&&r<=R){
+        //把区间[l,r]覆盖成1
+        if(op=='U'){
+            cover[rt]=1;
+            XOR[rt]=0;
+        }
+        //把区间[l,r]覆盖成0
+        else if(op=='D'){
+            cover[rt]=0;
+            XOR[rt]=0;
+        }
+        //[l,r]区间0/1互换
+        else if(op=='C'||op=='S'){
+            FXOR(rt);
+        }
+        return;
+    }
+    PushDown(rt);
+    int m=(l+r)>>1;
+    if(L<=m)    update(op,L,R,lson);
+    //[-∞,l)(r,∞]覆盖成0
+    else if(op=='I'||op=='C')   cover[rt<<1]=XOR[rt<<1]=0;
+    if(R>m)     update(op,L,R,rson);
+    //[-∞,l)(r,∞]覆盖成0
+    else if(op=='I'||op=='C')   cover[rt<<1|1]=XOR[rt<<1|1]=0;
+}
+
+//用Hash把被覆盖成1的数字标记
+void query(int l,int r,int rt)
+{
+    if(cover[rt]==1){
+        for(int i=l;i<=r;i++){
+            Hash[i]=true;
+        }
+        return;
+    }
+    else if(cover[rt]==0)   return;
+    if(l==r)    return;
+    PushDown(rt);
+    int m=(l+r)>>1;
+    query(lson);
+    query(rson);
+}
+
+int main()
+{
+//    freopen("in.txt","r",stdin);
+    int l,r;
+    char op,a,b;
+    while(scanf("%c %c%d,%d%c\n",&op,&a,&l,&r,&b)!=EOF)
+    {
+        l<<=1;r<<=1;
+        if(a=='(')  l++;
+        if(b==')')  r--;
+        if(l>r){
+            //把[-∞,l)(r,∞]覆盖成0,因为a>b,所以覆盖的是全集
+            if(op=='I'||op=='C'){
+                cover[1]=XOR[1]=0;
+            }
+        }
+        else update(op,l,r,0,maxn,1);
+    }
+    query(0,maxn,1);
+
+    int s=-1,e;
+    bool flag=false;
+    for(int i=0;i<maxn;i++){
+        if(Hash[i]){
+            if(s==-1)   s=i;
+            e=i;
+        }
+        else{
+            if(s==-1)   continue;
+            if(flag)    printf(" ");
+            //对开区间端点处理时左端点+1，右端点-1，所以这里输出时右端点需要+1
+            printf("%c%d,%d%c",s&1?'(':'[',s>>1,(e+1)>>1,e&1?')':']');
+            s=-1;
+            flag=true;
+        }
+    }
+    if(!flag)   printf("empty set");
+    printf("\n");
+    return 0;
+}

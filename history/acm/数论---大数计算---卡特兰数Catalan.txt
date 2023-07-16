@@ -1,0 +1,53 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstdio>
+#include <cmath>
+#include <algorithm>
+using namespace std;
+
+vector<int> C[101];//倒序存储
+const int scale = 10000;//转化为scale进制
+void myreverse(vector<int> & t) {//倒序结果， 没有用
+	for (int i = 0, len = t.size() / 2; i < len; ++i) {
+		swap(t[i], t[t.size() - 1 - i]);
+	}
+}
+void multiply(int which, int num) {
+	int extra = 0, sum;
+	vector<int> & t = C[which - 1];
+	for (int i = 0; i < t.size(); ++i) {
+		sum = t[i] * num + extra;
+		C[which].push_back(sum % scale);
+		extra = sum / scale;
+	}
+	if (extra)C[which].push_back(extra);
+	//myreverse(C[which]);
+}
+void divide(int which, int num) {
+	int extra = 0, shang, yu = 0;
+	vector<int> & t = C[which];
+	for (int i = t.size() - 1; i >= 0; --i) {
+		shang = (t[i] + yu * scale) / num;
+		yu = (t[i] + yu * scale) % num;
+		t[i] = shang;
+	}
+	if (!t[t.size() - 1])t.erase(t.end() - 1);//删掉最高位的0
+}
+int main() {
+	C[1].push_back(1);
+	for (int i = 2; i <= 100; ++i) {
+		multiply(i, 4 * i - 2);
+		divide(i, i + 1);
+	}
+	int n;
+	while (~scanf("%d", &n) && ~n) {
+		printf("%d", *(C[n].end() - 1));
+		for (int i = C[n].size() - 2; i >= 0; --i) {
+			printf("%04d", C[n][i]);
+		}
+		printf("\n");
+	}
+
+	return 0;
+}

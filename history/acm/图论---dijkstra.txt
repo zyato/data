@@ -1,0 +1,185 @@
+/*
+方式一：邻接矩阵
+时间复杂度：O(n^2)
+*/
+const int maxn = 1005;
+const int inf = 0x3f3f3f3f;
+//dist[i]表示从起始点start到i点的最短距离。
+int dist[maxn], G[maxn][maxn];
+bool vis[maxn];
+//节点标号从1-n
+
+void dijkstra(int start, int n) {
+	memset(vis, 0, sizeof(vis));
+	vis[start] = true; 
+	for (int i = 1; i <= n; ++i)dist[i] = G[start][i];
+	dist[start] = 0;
+	int x, m;
+	for (int i = 1; i < n; ++i) {
+		m = inf;
+		for (int j = 1; j <= n; ++j) {
+			if (!vis[j] && dist[j] < m) {
+				m = dist[j];
+				x = j;
+			}
+		}
+		vis[x] = true;
+		for (int j = 1; j <= n; ++j) {
+			if (!vis[j] && dist[j] > dist[x] + G[x][j]){
+				dist[j] = dist[x] + G[x][j];
+				//PreRoute[j] = x; 加上此代码可以递归获取路径。
+			}
+		}
+	}
+}
+/*
+方式二：邻接表(vector实现)
+优点： 省内存
+*/
+const int maxn = 1005;
+const int inf = 0x3f3f3f3f;
+vector<pair<int, int> > vec[maxn];
+bool vis[maxn];
+int dist[maxn];
+void dijkstra(int start, int n) {
+	memset(vis, 0, sizeof(vis));
+	vis[start] = true; 
+	memset(dist, 0x3f, sizeof(dist));
+	vector<pair<int, int> >::iterator it;
+	for (it = vec[start].begin(); it != vec[start].end(); it++) {
+		dist[it->first] = min(dist[it->first], it->second);
+	}
+	dist[start] = 0;
+	int x, m;
+	for (int i = 1; i < n; ++i) {
+		m = inf;
+		for (int j = 1; j <= n; ++j) {
+			if (!vis[j] && dist[j] < m) {
+				m = dist[j];
+				x = j;
+			}
+		}
+		vis[x] = true;
+		if (x == 1)break;
+		for (it = vec[x].begin(); it != vec[x].end(); it++) {
+			if(!vis[it->first])
+				dist[it->first] = min(dist[it->first], dist[x] + it->second);
+		}
+	}
+}
+/*
+方式三： dijkstra+优先队列（堆优化）
+*/
+const int maxn = 1005;
+struct node {
+	int index, dist;
+	bool operator < (const node &x)const {
+		return dist > x.dist;
+	}
+};
+vector<node> vec[maxn];
+int dist[maxn];
+bool vis[maxn];
+void dijkstra(int start) {
+	memset(dist, 0x3f, sizeof(dist));
+	dist[start] = 0;
+	node x;
+	vector<node>::iterator it;
+	priority_queue<node> pq;
+	pq.push(node{ start,0 });
+	while (!pq.empty()) {
+		x = pq.top(); pq.pop();
+		int u = x.index;
+		if (vis[u]) continue;
+		vis[u] = true;
+		for (it = vec[u].begin(); it != vec[u].end(); it++) {
+			if (!vis[it->index] && dist[it->index] > dist[u] + it->dist) {
+				dist[it->index] = dist[u] + it->dist;
+				pq.push(node{ it->index, dist[it->index] });
+			}
+		}
+	}
+}
+/*
+前向星存储边。
+*/
+#include <iostream>
+#include <queue>
+#include <cstring>
+using namespace std;
+const int maxn = 1010, maxedge = 2010;
+struct edge {
+	int to, dist, next;
+}E[maxedge << 1];
+//head[i]表示上一个以i为弧尾的结点是head[i].
+int head[maxn], dist[maxn], edgeCnt;
+bool vis[maxn];
+
+inline void add_edge(int a, int b, int v) {
+	edgeCnt++;
+	E[edgeCnt].dist = v;
+	E[edgeCnt].to = b;
+	E[edgeCnt].next = head[a];//意思就是找到另外一个(上次加进来)边（a, x, vx）
+	head[a] = edgeCnt;
+}
+
+struct node {
+	int dist;
+	int pos;
+	bool operator <(const node &x)const {
+		//逆定义<, 因为优先队列默认大数在前.
+		return dist > x.dist;
+	}
+};
+
+void init(){
+	memset(dist, 0x3f, sizeof(dist));
+	memset(vis, 0, sizeof(vis));
+	memset(head, 0, sizeof(head));
+	edgeCnt = 0;
+}
+
+inline void dijkstra(int s) {//注意：初识化工作、edgeCnt = 0；
+	priority_queue<node> pq;	
+	dist[s] = 0;
+	pq.push(node{ 0, s });
+	while (!pq.empty()) {
+		node tmp = pq.top();
+		pq.pop();
+		int x = tmp.pos, d = tmp.dist;
+		if (vis[x])
+			continue;
+		vis[x] = 1;
+		for (int i = head[x]; i; i = E[i].next)
+		{
+			int y = E[i].to;
+			if (dist[y] > dist[x] + E[i].dist)
+			{
+				dist[y] = dist[x] + E[i].dist;
+				if (!vis[y])
+				{
+					pq.push(node{ dist[y], y });
+				}
+			}
+		}
+	}
+}
+
+int main() {
+	ios::sync_with_stdio(0);
+	cin.tie(0); cout.tie(0);
+	int n, start;
+	while (cin >> n >> start) {
+		int a, b, v;
+		init();
+		for (int i = 0; i < n; ++i) {
+			cin >> a >> b >> v;
+			add_edge(a, b, v);
+			add_edge(b, a, v);
+		}		
+		dijkstra(start);
+		cout << dist[1] << endl;
+	}
+
+	return 0;
+}

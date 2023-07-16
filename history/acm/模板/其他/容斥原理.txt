@@ -1,0 +1,107 @@
+这道题可以说是容斥原理模板题了吧
+首先说下容斥原理，可以参考百度百科容斥原理
+其实高中我们也学过这个东西。
+举个例子，1到100中能被2或3整除的数的个数，首先可以算出能被2整除的数的个数，为100/2=50个，能被3整除的有100/3=33个，然而能够同时被2和3整除的数被计算了两次，能同时被2和3整除即等价于能够被2和3 的最小公倍数6整除。有100/6=16个。故能被2或3整除的数有50+33-16=67个
+那如果要找出1到n中能被a1,a2,a3,,,am这m个数中至少有一个整除的数有多少个呢？
+那很显然就可以套用容斥原理的公式了。具体过程《挑战程序设计竞赛》这本书高级篇计算里说得很详细。
+回到这道题。
+直接枚举肯定会超时，我们需要用容斥原理计数。首先我们要理解这样一个事实，n和m不互质，那么它们最大公约数大于1，由于n和m都可以分解质因数，那么它们必然至少存在一个质因子是相同的。
+好，给定区间[l,r]，我们如何计算出有多少数与n互质呢，这跟欧拉函数并没有什么关系，插一句，欧拉函数是求小于n且与n互质数的总数。
+我们可以这样考虑，区间[l,r]总有r-l+1个数，如果我们计算出有x个数与n是不互质的，那么最后互质的总数为r-l+1-x。
+不互质的数我们可以用容斥定理高效求出。
+首先对n进行分解质因数。假设分解后有y个因数，如果区间[l,r]中的数能整除某个因数，那么这个数必然与n不互质。
+如何实现容斥原理公式呢？首先要用到一个技巧，即利用整数的二进制编码枚举子集，对于每个子集，算出最小公倍数，倘若子集元素个数为奇数个，那个这次计数的符号为+，否则为-。
+下面是AC代码：
+[cpp] view plain copy
+#include<cstdio>  
+#include<cstring>  
+#include<cmath>  
+#include<cstdlib>  
+#include<iostream>  
+#include<algorithm>  
+#include<sstream>  
+#include<fstream>  
+#include<vector>  
+#include<map>  
+#include<stack>  
+#include<list>  
+#include<set>  
+#include<queue>  
+#define LL long long  
+#define lson l,m,rt<<1  
+#define rson m+1,r,rt<<1 | 1  
+using namespace std;  
+const int maxn=100005,inf=1<<29;  
+LL l,r,n;  
+//n<=10^9,m<=15  
+//给定m个数，问1到n中至少能整除这m个数中其中一个数的数共有多少个  
+//算法复杂度O(m*(2^m))次方  
+struct node{int x,cnt;};  
+int p[maxn],is[maxn],np;  
+void GetPrime()//筛法求素数  
+{  
+    is[0]=1;is[1]=1;  
+    for(int i=2;i<maxn;i++)  
+        if(!is[i])  
+        {  
+            p[++np]=i;  
+            for(int j=2*i;j<maxn;j+=i) is[j]=1;  
+        }  
+}  
+vector<node> factor(LL n)//分解质因数  
+{  
+    vector<node> ans;  
+    node t;  
+    for(int i=1;p[i]*p[i]<=n;i++)  
+    {  
+        if(n%p[i]==0)  
+        {  
+            t.x=p[i],t.cnt=0;  
+            while(n%p[i]==0) t.cnt++,n/=p[i];  
+            //cout<<"n = "<<n<<endl;  
+            ans.push_back(t);  
+        }  
+    }  
+    if(n!=1) t.cnt=1,t.x=n,ans.push_back(t);  
+    return ans;  
+}  
+LL gcd(LL a,LL b)//求最大公约数  
+{  
+    return b?gcd(b,a%b):a;  
+}  
+LL solve()//容斥原理公式的实现  
+{  
+    LL res=0;  
+    vector<node>a;  
+    a=factor(n);//首先对n进行因式分解  
+    int m=a.size();  
+    for(int i=1;i<(1<<m);i++)//枚举子集  
+    {  
+        int Count=0;  
+        for(int j=i;j;j>>=1) Count+=j&1;//算出子集元素的个数  
+        LL lcm=1;  
+        for(int j=0;j<m;j++)  
+            if(i>>j&1)  
+            {  
+                lcm=lcm*a[j].x/gcd(lcm,a[j].x);//算出每个子集的最小公倍数  
+                if(lcm>n) break;//n除比它大的数等于0，不必再计算下去了，再计算会溢出  
+            }  
+        if(Count&1) res+=r/lcm-(l-1)/lcm;//子集个数为奇数则计数加  
+        else res-=r/lcm-(l-1)/lcm;//否则减  
+    }  
+    return r-l+1-res;  
+}  
+int main()  
+{  
+    GetPrime();  
+    int t,Case=1;  
+    cin>>t;  
+    while(t--)  
+    {  
+        cin>>l>>r>>n;//注意用LL型，WA了一次  
+        //for(int i=0;i<m;i++) cin>>a[i];  
+        //cout<<solve()<<endl;  
+        printf("Case #%d: %I64d\n",Case++,solve());  
+    }  
+    return 0;  
+} 

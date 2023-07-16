@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct MergeSort {
+    vector<int> vec; // 临时存储合并两有序数组的结果
+    MergeSort(int n) { // n为待排序数组长度
+        vec.resize(n);
+    }
+    void mergeSort(vector<int>& A, int l, int r) { // 排序区间为A数组的[l, r]区间
+        if (l >= r) return;
+        int m = (l + r) / 2;
+        mergeSort(A, l, m);
+        mergeSort(A, m + 1, r);
+        merge(A, l, m, m + 1, r);
+    }
+    void merge(vector<int>& A, int la, int ra, int lb, int rb) {
+        int a = la, b = lb, f = la;
+        while (a <= ra || b <= rb) {
+            if (a > ra) {
+                vec[f] = A[b]; b++;
+            }
+            else if (b > rb) {
+                vec[f] = A[a]; a++;
+            }
+            else {
+                if (A[a] <= A[b]) {
+                    vec[f] = A[a]; a++;
+                }
+                else {
+                    vec[f] = A[b]; b++;
+                }
+            }
+            f++;
+        }
+        for (int i = la; i <= rb; i++) {
+            A[i] = vec[i];
+        }
+    }
+};
+
+int main(){
+    //freopen("in.txt", "r", stdin);
+    int arr[] = { 1254,1,31,1,2543125,1,1,12543242,1,1,1,1,1,1524 };
+    vector<int> t;
+    t.assign(arr, arr + sizeof(arr) / sizeof(int));
+    MergeSort ms(t.size());
+    ms.mergeSort(t, 0, t.size() - 1);
+    for (int it : t) cout << it << " "; cout << endl;
+
+    return 0;
+}

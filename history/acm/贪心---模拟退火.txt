@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+using namespace std;
+const int cons = 11, enemy = 1010;
+const double eps = 1e-10;
+int x[cons], y[cons], r[cons], p[enemy], q[enemy], ANS;
+double ansx, ansy;
+
+int calc(double curx, double cury, double R, int n, int m) {
+    double curr = R;
+    for (int i = 0; i < n; i++) curr = min(curr, sqrt(pow(curx - x[i], 2) + pow(cury - y[i], 2)) - (double)r[i]);
+    int cnt = 0;
+    for (int i = 0; i < m; i++)
+        if (pow(curx - p[i], 2) + pow(cury - q[i], 2) - curr * curr <= eps) cnt++;
+    return cnt;
+}
+
+int SA(double R, int n, int m) {
+    double T = 6000, Te = 1e-10, delta = 0.996;
+    double curx, cury;
+    int ANS = calc(ansx, ansy, R, n, m);
+    int curans, deltaE, ans = 0;
+    srand((unsigned)time(NULL));
+    //  T*(rand()*2-RAND_MAX)  生成一个[-T*RAND_MAX,T*RAND_MAX)的随机变动距离
+    while (T > Te) {
+        curx = ansx + T * (rand() * 2.0 - RAND_MAX);
+        cury = ansy + T * (rand() * 2.0 - RAND_MAX);
+        curans = calc(curx, cury, R, n, m);
+        deltaE = curans - ans;
+        if (deltaE > 0) {
+            ansx = curx; ansy = cury; ans = curans;
+            ANS = max(ans, ANS);
+        }
+        //按概率接受，保证了越到后期，和最优解的差距越大，越难被接受
+        else if (exp(-deltaE / T) < (double)rand() / RAND_MAX) {
+            ansx = curx; ansy = cury; ans = curans;
+        }
+        T *= delta;
+    }
+    if ((double)clock() / CLOCKS_PER_SEC <= 0.8) ANS = max(ANS, SA(R, n, m));
+    return ANS;
+}
+int main() {
+    //freopen("in.txt", "r", stdin);
+    int n, m, R;
+    ansx = ansy = 0;
+    scanf("%d%d%d", &n, &m, &R);
+    for (int i = 0; i < n; i++) scanf("%d%d%d", &x[i], &y[i], &r[i]);
+    for (int i = 0; i < m; i++) {
+        scanf("%d%d", &p[i], &q[i]);
+    }
+    ansx = p[0]; ansy = q[0];
+    printf("%d\n", SA(R, n, m));
+    return 0;
+}

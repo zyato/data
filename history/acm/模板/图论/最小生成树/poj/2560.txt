@@ -1,0 +1,101 @@
+Freckles
+Time Limit: 1000MS	 	Memory Limit: 65536K
+Total Submissions: 8741	 	Accepted: 4174
+Description
+
+In an episode of the Dick Van Dyke show, little Richie connects the freckles on his Dad's back to form a picture of the Liberty Bell. Alas, one of the freckles turns out to be a scar, so his Ripley's engagement falls through. 
+Consider Dick's back to be a plane with freckles at various (x,y) locations. Your job is to tell Richie how to connect the dots so as to minimize the amount of ink used. Richie connects the dots by drawing straight lines between pairs, possibly lifting the pen between lines. When Richie is done there must be a sequence of connected lines from any freckle to any other freckle.
+Input
+
+The first line contains 0 < n <= 100, the number of freckles on Dick's back. For each freckle, a line follows; each following line contains two real numbers indicating the (x,y) coordinates of the freckle.
+Output
+
+Your program prints a single real number to two decimal places: the minimum total length of ink lines that can connect all the freckles.
+Sample Input
+
+3
+1.0 1.0
+2.0 2.0
+2.0 4.0
+Sample Output
+
+3.41
+Source
+
+Waterloo local 2000.09.23
+
+题目大意：求经过所有点的最短路径。
+
+题目分析：首先算出任意两点的距离，然后直接跑prim算法求出最小生成树就可以了。
+
+代码：
+[cpp] view plain copy
+#include <cmath>  
+#include <vector>  
+#include <string>  
+#include <stdio.h>  
+#include <string.h>  
+#include <iostream>  
+#include <algorithm>  
+using namespace std;  
+const int maxn=200;  
+const int inf=1<<29;  
+struct Point{  
+    double x,y;  
+};  
+int s,n;  
+double ans;  
+Point p[maxn];  
+bool vis[maxn];  
+double Map[maxn][maxn],d[maxn];  
+  
+double min(double a,double b)  
+{  
+    return a<b?a:b;  
+}  
+  
+double getdis(Point a,Point b)  
+{  
+    return sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));  
+}  
+  
+double prim()  
+{  
+    fill(vis,vis+maxn,0);//初始化每个点都未被加入到答案集合中  
+    fill(d,d+maxn,inf);//初始化每个顶点到答案集合的最近距离  
+    d[1]=0;//将顶点1加入到答案集合中  
+    ans=0;//最小生成树权值  
+    while(true)  
+    {  
+        int v=-1;//记录下一个将要加入答案集合的顶点  
+        for(int i=1;i<=n;i++)//贪心选取离答案集合距离最近的顶点  
+            if(!vis[i]&&(v==-1||d[i]<d[v])) v=i;  
+        if(v==-1) break;//如果顶点都访问完了，那么v必然等于-1，则退出循环，算法结束  
+        vis[v]=1;//加入答案集合  
+        if(d[v]==inf) return -1;//存在孤立点，则不存在最小生成树  
+        ans+=d[v];//加上权值  
+        for(int i=1;i<=n;i++)//更新未加入答案集合的那些顶点到答案集合的最小距离  
+            if(!vis[i]) d[i]=min(d[i],Map[v][i]);  
+    }  
+    return ans;  
+}  
+  
+int main()  
+{  
+    //freopen("in.txt","r",stdin);  
+    //freopen("out.txt","w",stdout);  
+    while(cin>>n)  
+    {  
+        for(int i=1;i<=n;i++){  
+            cin>>p[i].x>>p[i].y;  
+        }  
+        for(int i=1;i<=n;i++){  
+            for(int j=1;j<i;j++){  
+                Map[i][j]=Map[j][i]=getdis(p[i],p[j]);  
+            }  
+            Map[i][i]=inf;  
+        }  
+        printf("%.2lf\n",prim());  
+    }  
+    return 0;  
+}  

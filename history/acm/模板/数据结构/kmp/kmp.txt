@@ -1,0 +1,68 @@
+#include <iostream>
+#include <memory.h>
+#include <stdio.h>
+
+using namespace std;
+const int maxn=1000;
+int Next[maxn];
+
+void GetNextval(char* p, int Next[])
+{
+    int pLen = strlen(p);
+    Next[0] = -1;
+    int k = -1;
+    int j = 0;
+    while (j < pLen - 1) {
+        ///p[k]表示前缀，p[j]表示后缀
+        if (k == -1 || p[j] == p[k]) {
+            ++j;
+            ++k;
+            ///因为不能出现p[j] = p[ Next[j ]]
+            ///所以当出现时需要继续递归，k = Next[k] = Next[Next[k]]
+            if (p[j] != p[k]) {
+                Next[j] = k;
+            } else {
+                Next[j] = Next[k];
+            }
+        } else {
+            k = Next[k];
+        }
+    }
+}
+
+int KmpSearch(char* s, char* p)
+{
+    int i = 0;
+    int j = 0;
+    int sLen = strlen(s);
+    int pLen = strlen(p);
+    while (i < sLen && j < pLen) {
+        ///如果j = -1，或者当前字符匹配成功（即S[i] == P[j]），都令i++，j++
+        if (j == -1 || s[i] == p[j]) {
+            i++;
+            j++;
+        } else {
+            ///如果j != -1，且当前字符匹配失败（即S[i] != P[j]），则令 i 不变，j = Next[j]
+            ///Next[j]即为j所对应的Next值
+            j = Next[j];
+        }
+    }
+    if (j == pLen) {
+        return i - j;
+    } else {
+        return -1;
+    }
+}
+
+int main()
+{
+    //freopen("in.txt","r",stdin);
+    //freopen("out.txt","w",stdout);
+    char p[maxn],s[maxn];
+    while(cin>>s>>p)
+    {
+        GetNextval(p,Next);
+        cout<<KmpSearch(s,p)<<endl;
+    }
+    return 0;
+}

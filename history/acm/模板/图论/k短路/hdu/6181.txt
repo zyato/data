@@ -1,0 +1,172 @@
+Two Paths
+Time Limit: 4000/2000 MS (Java/Others)    Memory Limit: 153428/153428 K (Java/Others)
+Total Submission(s): 1136    Accepted Submission(s): 532
+
+
+Problem Description
+You are given a undirected graph with n nodes (numbered from 1 to n) and m edges. Alice and Bob are now trying to play a game. 
+Both of them will take different route from 1 to n (not necessary simple).
+Alice always moves first and she is so clever that take one of the shortest path from 1 to n.
+Now is the Bob's turn. Help Bob to take possible shortest route from 1 to n.
+There's neither multiple edges nor self-loops.
+Two paths S and T are considered different if and only if there is an integer i, so that the i-th edge of S is not the same as the i-th edge of T or one of them doesn't exist.
+ 
+
+Input
+The first line of input contains an integer T(1 <= T <= 15), the number of test cases.
+The first line of each test case contains 2 integers n, m (2 <= n, m <= 100000), number of nodes and number of edges. Each of the next m lines contains 3 integers a, b, w (1 <= a, b <= n, 1 <= w <= 1000000000), this means that there's an edge between node a and node b and its length is w.
+It is guaranteed that there is at least one path from 1 to n.
+Sum of n over all test cases is less than 250000 and sum of m over all test cases is less than 350000.
+ 
+
+Output
+For each test case print length of valid shortest path in one line.
+ 
+
+Sample Input
+2
+3 3
+1 2 1
+2 3 4
+1 3 3
+2 1
+1 2 1
+ 
+
+Sample Output
+5
+3
+Hint
+
+For testcase 1, Alice take path 1 - 3 and its length is 3, and then Bob will take path 1 - 2 - 3 and its length is 5.
+For testcase 2, Bob will take route 1 - 2 - 1 - 2  and its length is 3
+ 
+ 
+
+Source
+2017 Multi-University Training Contest - Team 1
+
+题目大意：给出一个无向图，现在有两个人，假设是A和B，已知起点为1，终点为n，现在A从起点到终点一定会走最短的路线，B的走法也是走最短的路线，但是B的路线不能和A完全一样。也就是说如果从起点到终点有多条最短路那么B走的路线也是最短路，如果只有一条最短路那么B走的路线为次短路和重复最短路当中的一条边的路线的小的那条路线。例如只有一条路线1->2,权值为1，现在A走的路线为1->2,B走的路线为1->2->1->2（注意边能重复走）。
+
+题目分析：如果敏感的话可以一眼就看出这是一个求次短路的题，直接用A*算法可以得到答案，唯一要注意的一点是这是一个无向图，正向和反向建图都要两次（因为是邻接表存储）。
+
+代码：
+[cpp] view plain copy
+#include <algorithm>  
+#include <cstring>  
+#include <cstdio>  
+#include <vector>  
+#include <queue>  
+#include <map>  
+  
+using namespace std;  
+typedef long long LL;  
+const LL maxn=100000+10;  
+const LL INF=99999999999999999;  
+LL k,n,m,T,MIN;  
+bool visit[maxn];  
+LL dis[maxn],tdis[maxn];  
+struct Node{  
+    LL node,cost;  
+    Node(LL n=0,LL c=0)   :node(n),cost(c)    {}  
+    bool operator <(const Node& a)  const{  
+        return dis[node]+cost>dis[a.node]+a.cost;  
+    }  
+};  
+struct Edge{  
+    LL to,cost;  
+    Edge(LL t=0,LL c=0)   :to(t),cost(c)  {}  
+};  
+vector<Edge>E[maxn],revE[maxn];  
+  
+void addedge(LL u,LL v,LL w)  
+{  
+    E[u].push_back(Edge(v,w));  
+    E[v].push_back(Edge(u,w));  
+    revE[u].push_back(Edge(v,w));  
+    revE[v].push_back(Edge(u,w));  
+}  
+  
+void dijkstra(LL s)  
+{  
+    memset(visit,false,sizeof(visit));  
+    for(LL i=1;i<=n;i++){  
+        tdis[i]=INF;  
+    }  
+    priority_queue<Node>que;  
+    while(!que.empty()) que.pop();  
+    tdis[s]=0;  
+    que.push(Node(s,0));  
+    while(!que.empty())  
+    {  
+        Node now=que.top();que.pop();  
+        LL u=now.node;  
+        if(visit[u])    continue;  
+        visit[u]=true;  
+        for(LL i=0;i<(LL)revE[u].size();i++){  
+            LL v=revE[u][i].to;  
+            LL cost=revE[u][i].cost;  
+            if(!visit[v]&&tdis[v]>tdis[u]+cost){  
+                tdis[v]=tdis[u]+cost;  
+                que.push(Node(v,tdis[v]));  
+            }  
+            MIN=min(MIN,tdis[v]);  
+        }  
+    }  
+    for(LL i=1;i<=n;i++){  
+        dis[i]=tdis[i];  
+    }  
+}  
+  
+LL astar(LL s)  
+{  
+    priority_queue<Node>que;  
+    while(!que.empty()) que.pop();  
+    que.push(Node(s,0));k--;  
+    while(!que.empty())  
+    {  
+        Node pre=que.top();que.pop();  
+        LL u=pre.node;  
+        if(u==n){  
+            if(k){  
+                k--;  
+            } else {  
+                return pre.cost;  
+            }  
+        }  
+        for(LL i=0;i<(LL)E[u].size();i++){  
+            LL v=E[u][i].to;  
+            LL cost=E[u][i].cost;  
+            que.push(Node(v,pre.cost+cost));  
+        }  
+    }  
+    return -1;  
+}  
+  
+int main()  
+{  
+    //freopen("in.txt","r",stdin);  
+    //freopen("out.txt","w",stdout);  
+    scanf("%lld",&T);  
+    while(T--)  
+    {  
+        MIN=INF;  
+        LL u,v,w;  
+        scanf("%lld%lld",&n,&m);  
+        for(LL i=0;i<=n;i++){  
+            dis[i]=INF;  
+            E[i].clear();  
+            revE[i].clear();  
+        }  
+        for(LL i=1;i<=m;i++){  
+            scanf("%lld%lld%lld",&u,&v,&w);  
+            addedge(u,v,w);  
+        }  
+        k=2;  
+        dijkstra(n);  
+        if(1==n)    k++;  
+        LL ans=astar(1);  
+        printf("%lld\n",ans);  
+    }  
+    return 0;  
+}

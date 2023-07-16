@@ -1,0 +1,103 @@
+Protecting the Flowers
+
+Time Limit: 2000MS
+
+Memory Limit: 65536K
+
+Total Submissions: 7097
+
+Accepted: 2869
+
+Description
+
+Farmer John went to cut some wood and left N (2 ≤ N ≤ 100,000) cows eating the grass, as usual. When he returned, he found to his horror that the cluster of cows was in his garden eating his beautiful flowers. Wanting to minimize the subsequent damage, FJ decided to take immediate action and transport each cow back to its own barn.
+
+Each cow i is at a location that is Ti minutes (1 ≤ Ti ≤ 2,000,000) away from its own barn. Furthermore, while waiting for transport, she destroys Di (1 ≤ Di ≤ 100) flowers per minute. No matter how hard he tries, FJ can only transport one cow at a time back to her barn. Moving cow i to its barn requires 2 × Ti minutes (Ti to get there and Ti to return). FJ starts at the flower patch, transports the cow to its barn, and then walks back to the flowers, taking no extra time to get to the next cow that needs transport.
+
+Write a program to determine the order in which FJ should pick up the cows so that the total number of flowers destroyed is minimized.
+
+Input
+
+Line 1: A single integer N 
+Lines 2..N+1: Each line contains two space-separated integers, Ti and Di, that describe a single cow's characteristics
+
+Output
+
+Line 1: A single integer that is the minimum number of destroyed flowers
+
+Sample Input
+
+6
+
+3 1
+
+2 5
+
+2 3
+
+3 2
+
+4 1
+
+1 6
+
+Sample Output
+
+86
+
+Hint
+
+FJ returns the cows in the following order: 6, 2, 3, 4, 1, 5. While he is transporting cow 6 to the barn, the others destroy 24 flowers; next he will take cow 2, losing 28 more of his beautiful flora. For the cows 3, 4, 1 he loses 16, 12, and 6 flowers respectively. When he picks cow 5 there are no more cows damaging the flowers, so the loss for that cow is zero. The total flowers lost this way is 24 + 28 + 16 + 12 + 6 = 86.
+
+ 
+
+ 
+
+题目大意：花园里现在有n头奶牛正在吃花朵，现在农夫去把奶牛弄走，但是每次只能弄走一头，现在给出农夫到奶牛要用的时间（只是去不包括回来），和每分钟奶牛吃的花朵数，移走奶牛的顺序由你决定，要求输出最少会被吃掉的花朵数。
+
+ 
+
+题目分析：简单的贪心题，根据局部最优原则，所以每次肯定是要求移走奶牛的时间乘以剩余奶牛每分钟吃的花朵数最小就行了，于是根据这个原则，对它进行排序，然后依次把被吃掉的花朵数加起来就行了，但是要注意计算每次被吃掉的花朵数是不能用二重循环，开始在这超时了，然后注意是多组输入，呜呜呜，在这挂了好几次。。。
+
+ 
+
+代码：
+
+[cpp] view plain copy
+<span style="font-family:Microsoft YaHei;font-size:18px;">#include<iostream>  
+#include<algorithm>  
+   
+usingnamespacestd;  
+#definesize100010  
+   
+structstrc  
+{  
+      longlongtime, flowers;  
+} str[size];  
+   
+bool cmp(strca,strcb)  
+{  
+      returna.flowers*b.time>a.time*b.flowers;  
+}  
+   
+int main()  
+{  
+      intN;  
+      while(cin >> N)  
+      {  
+          longlongsum = 0, sum1 = 0;  
+          for(int i = 0; i<N; i++)  
+           {  
+                 cin>> str[i].time >> str[i].flowers;  
+                 sum1+= str[i].flowers;  
+           }  
+           sort(str,str + N, cmp);  
+          for(int i = 0; i<N; i++)  
+           {  
+                 sum1-= str[i].flowers;  
+                 sum+= str[i].time * 2 * sum1;  
+           }  
+           cout<< sum << endl;  
+      }  
+      return0;  
+}</span>

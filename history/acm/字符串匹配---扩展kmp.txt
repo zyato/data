@@ -1,0 +1,48 @@
+/*
+1. 扩展kmp处理的问题：
+	对于一个串T，串S每个后缀和串T的最长公共前缀。
+2. kmp和扩展kmp算法的next数组区别：
+	kmp中预处理的next数组：
+		next[i]表示下标i前面最长的子串的长度为next[i]（不包括下标为i的字符）与S前缀相同。
+	扩展kmp中预处理的的next数组：
+		S[i....len(s)-1]与S的最长公共前缀。（具体是串S下标为i的字符（包含在内）开始的后缀最长长度为next[i]和S的前缀相同）。
+*/
+const int maxn = 1e5 + 100;
+int Next[maxn], extend[maxn];
+char albet[30], str[maxn], t[maxn];
+
+void getNext(char* str) {
+	int i = 0, j, pos, len = strlen(str);
+	Next[0] = len;
+	while (str[i] == str[i + 1] && i + 1 < len)i++; Next[1] = i;
+	pos = 1;
+	for (int i = 2; i < len; i++) {
+		if (Next[i - pos] + i < Next[pos] + pos) {
+			Next[i] = Next[i - pos];
+		}
+		else {
+			j = Next[pos] + pos - i;
+			if (j < 0)j = 0;//如果i比最远的的小，说明得从头开始。
+			while (i + j < len&&str[j] == str[j + i])j++; Next[i] = j;
+			pos = i;
+		}
+	}
+}
+
+void Exkmp(char* t, char* str) {
+	int i = 0, j, pos, l1 = strlen(t), l2 = strlen(str);
+	getNext(str);
+	while (t[i] == str[i] && i < l1&&i < l2)i++; 
+	extend[0] = i;
+	pos = 0;
+	for (int i = 1; i < l1; i++) {
+		if (Next[i - pos] + i < extend[pos] + pos)
+			extend[i] = Next[i - pos];
+		else {
+			j = extend[pos] + pos - i;
+			if (j < 0)j = 0;
+			while (i + j < l1&&j < l2&&t[i + j] == str[j])j++; extend[i] = j;
+			pos = i;
+		}
+	}
+}

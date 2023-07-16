@@ -1,0 +1,90 @@
+#include<bits/stdc++.h>
+using namespace std;
+const int maxn = 1e6 + 10;
+int n, m;
+char s[maxn];
+
+int sa[maxn];  // 排名为i的后缀的位置
+int rak[maxn]; // 从第i个位置开始的后缀的排名
+int c[maxn], x[maxn], y[maxn]; //辅助基数排序
+inline void get_sa()
+{
+    for(int i = 1; i <= n; i++) c[x[i] = s[i]]++;
+    //c数组是桶
+    //x(i)是第i个元素的第一关键字
+    for(int i = 2; i <= m; i++)
+        c[i] += c[i - 1];  //利用前缀和可以快速定位排名
+    for(int i = n; i >= 1; i--)
+        sa[c[x[i]]--] = i; //sa(i):排名为i的后缀起始位
+    for(int k = 1; k <= n; k <<= 1)
+    {
+        int num = 0; //不同后缀的个数 当num == n时可以退出循环
+
+        //-------------对第二关键字排序关键代码
+        for(int i = n - k + 1; i <= n; i++) y[++num] = i;
+        //y(i)存的是起始位为i的后缀对应的第一关键字的起始位
+        //第n-k+1到第n位的第二关键字为0 
+        for(int i = 1; i <= n; i++)
+            if(sa[i] > k) y[++num] = sa[i] - k;
+        //排名为i的数 在字符串中的起始位是否是在k位之后
+        //因为在k位之前的都无法成为第一关键字
+        //如果满足sa(i)>k, 那么他可以作为别人的第二关键字
+        //而且他对应的第一关键字的起始位置为sa(i)-k
+        //于是把他对应的第一关键字的起始位置加入y
+        //i枚举的是第二关键字的排名, 第二关键字靠前的先入队
+        //-----------------
+
+        //此时第一关键字和第二关键字都处理好了
+        //对第一第二关键字合并的情况进行排序
+        for(int i = 1; i <= m; i++) c[i] = 0; //初始化桶
+        for(int i = 1; i <= n; i++) c[x[i]]++;
+        for(int i = 2; i <= m; i++) c[i] += c[i - 1];
+        for(int i = n; i >= 1; i--)
+            sa[c[x[y[i]]]--] = y[i];
+        //前缀排名为c(x(y(i)))的开始的位置
+        //第一关键字越靠前,在总排名中越靠前
+        //在同一个桶中,第二关键字排名靠后的在总排名也靠后
+        for(int i = 1; i <= n; i++) y[i] = x[i];
+        //生成新的x需要用到旧的, 就把旧的复制下来
+        x[sa[1]] = 1; num = 1;
+        for(int i = 2; i <= n; i++)
+            x[sa[i]] = (y[sa[i]] == y[sa[i-1]] && y[sa[i] + k] == y[sa[i-1] + k]) ? num : ++num;
+        //因为sa(i)已经排好序了, 所以可以按排名枚举,生成下一次的关键字
+        if(num == n) break;
+        m = num; //m表示不同的后缀的个数
+    }
+    for(int i = 1; i <= n; i++)
+        printf("%d ", sa[i] - 1); //输出结果
+}
+
+int height[maxn];
+void get_height()
+{
+    int k = 0;
+    for(int i = 1; i <= n; i++) rak[sa[i]] = i;
+    for(int i = 1; i <= n; i++)
+    {
+        if(rak[i] == 1) continue; //第一名height为0
+        if(k) k--; //h(i) >= h(i - 1) - 1;
+        int j = sa[rak[i] - 1];
+        while(j + k <= n && i + k <= n && s[i + k] == s[j + k]) k++;
+        height[rak[i]] = k;
+    }
+    for(int i = 1; i <= n; i++)
+        printf("%d ", height[i]);
+}
+
+int main()
+{
+    scanf("%s", s + 1);
+    n = strlen(s + 1); m = 122;
+    // n 表示原字符串长度, m表示字符个数
+    // ascll('z') = 122 小z的ascll是最大的
+    get_sa(); puts("");
+    get_height();
+    return 0;
+}
+
+作者：yxc的腿部挂件
+链接：https://www.acwing.com/blog/content/719/
+来源：AcWing

@@ -1,0 +1,77 @@
+#include <map>
+#include <queue>
+#include <vector>
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+#define ll long long
+#define ull unsigned long long
+#define cls(x) memset(x,0,sizeof(x))
+#define clslow(x) memset(x,-1,sizeof(x))
+
+const int maxn=1e5+100;
+
+int T,n;
+
+char s[10];
+int a[maxn],bit[maxn];
+
+int lowbit(int x)
+{
+    return x&-x;
+}
+
+void update(int x,int add)
+{
+    while(x<=n)
+    {
+        bit[x]+=add;
+        x+=lowbit(x);
+    }
+}
+
+int sum(int x)
+{
+    int res=0;
+    while(x>0)
+    {
+        res+=bit[x];
+        x-=lowbit(x);
+    }
+    return res;
+}
+
+int query(int x,int y)
+{
+    return sum(y)-sum(x-1);
+}
+
+int main()
+{
+//    freopen("in.txt","r",stdin);
+    scanf("%d",&T);
+    for(int Case=1;Case<=T;Case++){
+        cls(bit);
+        scanf("%d",&n);
+        for(int i=1;i<=n;i++){
+            scanf("%d",&a[i]);
+            update(i,a[i]);
+        }
+
+        printf("Case %d:\n",Case);
+        while(scanf("%s",s))
+        {
+            if(strcmp(s,"End")==0)  break;
+            int i,j;
+            scanf("%d%d",&i,&j);
+            if(strcmp(s,"Sub")==0)  j=-j;
+            if(strcmp(s,"Query")==0)    printf("%d\n",query(i,j));
+            else    update(i,j);
+        }
+    }
+	return 0;
+}

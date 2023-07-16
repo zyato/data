@@ -1,0 +1,92 @@
+#include <map>
+#include <queue>
+#include <math.h>
+#include <string>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+#define ll long long
+#define ull unsigned long long
+#define cls(x) memset(x,0,sizeof(x))
+#define clslow(x) memset(x,-1,sizeof(x))
+
+const int mod=1e9+7;
+const int maxn=1e5+100;
+const int maxm=2e5+100;
+const int inf=0x3f3f3f3f;
+
+int n,m,tot;
+
+int done[maxn];
+int d[maxn],head[maxn];
+
+struct Edge{
+    int v,c,nex;
+};
+Edge e[maxm<<1];
+
+struct HeapNode {
+    int u,c,d;
+    HeapNode(int u,int c,int d):u(u),c(c),d(d){}
+    bool operator< (const HeapNode& rhs) const
+    {
+        return d > rhs.d;
+    }
+};
+
+void addEdge(int u,int v,int c)
+{
+    e[tot].v=v;
+    e[tot].c=c;
+    e[tot].nex=head[u];
+    head[u]=tot++;
+}
+
+void dijkstra(int s,int t)
+{
+    int ans = 0;
+    cls(done);
+    priority_queue<HeapNode> Q;
+    for(int i=0;i<=n;i++)  d[i] = inf;
+    d[s]=0;Q.push(HeapNode(s,0,0));
+
+    while(!Q.empty())
+    {
+        HeapNode x = Q.top(); Q.pop();
+        int u = x.u,c=x.c;
+        if(done[u])  continue;
+        done[u]=true;
+        for(int i=head[u];i!=-1;i=e[i].nex){
+            int v = e[i].v,c1=e[i].c;
+            int val=(c==c1?0:1);
+
+            if(d[v] > d[u] + val){
+                d[v] = d[u] + val;
+                Q.push(HeapNode(v,c1,d[v]));
+            }
+        }
+    }
+    if(d[n]==inf)   d[n]=-1;
+    printf("%d\n",d[n]);
+}
+
+int main()
+{
+//    freopen("in.txt","r",stdin);
+    while(scanf("%d %d",&n,&m)!=EOF)
+    {
+        tot=0;
+        clslow(head);
+        for(int i=1;i<=m;i++){
+            int u,v,c;
+            scanf("%d %d %d",&u,&v,&c);
+            addEdge(u,v,c);
+            addEdge(v,u,c);
+        }
+        dijkstra(1,n);
+    }
+    return 0;
+}

@@ -1,0 +1,98 @@
+Max Sum
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 246305    Accepted Submission(s): 58157
+
+
+Problem Description
+Given a sequence a[1],a[2],a[3]......a[n], your job is to calculate the max sum of a sub-sequence. For example, given (6,-1,5,4,-7), the max sum in this sequence is 6 + (-1) + 5 + 4 = 14.
+ 
+
+Input
+The first line of the input contains an integer T(1<=T<=20) which means the number of test cases. Then T lines follow, each line starts with a number N(1<=N<=100000), then N integers followed(all the integers are between -1000 and 1000).
+ 
+
+Output
+For each test case, you should output two lines. The first line is "Case #:", # means the number of the test case. The second line contains three integers, the Max Sum in the sequence, the start position of the sub-sequence, the end position of the sub-sequence. If there are more than one result, output the first one. Output a blank line between two cases.
+ 
+
+Sample Input
+2
+5 6 -1 5 4 -7
+7 0 6 -1 1 -6 7 -5
+ 
+
+Sample Output
+Case 1:
+14 1 4
+
+Case 2:
+7 1 6
+ 
+
+Author
+Ignatius.L
+ 
+
+Recommend
+We have carefully selected several similar problems for you:  1176 1087 1069 2084 1058 
+
+题目大意： 给你一段序列，求出其中和最大的一段序列，输出这段序列的和，开始位置，结束位置。
+
+题目分析：题目还是很水的，状态方程一下就能够找出来，sum[i]=max( sum[i-1]+a[i] , a[i] ),我写的比较复杂，把所有的值都存下来了，其实只要用几个变量就行了。大神代码
+
+代码：
+[cpp] view plain copy
+<span style="font-family:Microsoft YaHei;">#include <iostream>  
+  
+using namespace std;  
+const int size=100050;  
+struct node{  
+    int sum,left,right;  
+};  
+node str[size];  
+int main()  
+{  
+    int n,k=1;  
+    int a[size];  
+    cin>>n;  
+    while(n--)  
+    {  
+        int m,MAX,pos=1;  
+        cin>>m;  
+        for(int i=1;i<=m;i++){  
+            cin>>a[i];  
+        }  
+        str[1].sum=a[1];  
+        str[1].left=1;  
+        str[1].right=1;  
+        for(int i=2;i<=m;i++){  
+            if(str[i-1].sum+a[i]>=a[i]){  
+                str[i].sum=str[i-1].sum+a[i];  
+                str[i].left=str[i-1].left;  
+                str[i].right=str[i-1].right+1;  
+            }  
+            else{  
+                str[i].sum=a[i];  
+                str[i].left=str[i].right=i;  
+            }  
+        }  
+        for(int i=1;i<=m;i++){  
+            if(i==1){  
+                MAX=str[i].sum;  
+            }  
+            else{  
+                if(MAX<str[i].sum){  
+                    MAX=str[i].sum;  
+                    pos=i;  
+                }  
+            }  
+        }  
+        cout<<"Case "<<k++<<':'<<endl;  
+        cout<<str[pos].sum<<" "<<str[pos].left<<" "<<str[pos].right<<endl;  
+        if(n>=1){  
+            cout<<endl;  
+        }  
+    }  
+    return 0;  
+}  
+</span>  

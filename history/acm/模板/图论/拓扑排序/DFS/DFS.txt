@@ -1,0 +1,62 @@
+<span style="font-family:Microsoft YaHei;font-size:18px;">#include <bits/stdc++.h>  
+  
+using namespace std;  
+const int maxn=200;  
+int n,m;  
+int G[maxn][maxn];  
+int c[maxn],top[maxn],t;  
+  
+bool dfs(int u)  
+{  
+    c[u]=-1;  
+    for(int i=1;i<=n;i++)if(G[u][i]){  
+        if(c[i]<0)  return false;  
+        else if(!c[i]&&!dfs(i)) return false;  
+    }  
+    c[u]=1;top[--t]=u;  
+    return true;  
+}  
+  
+bool topsort()  
+{  
+    t=n;  
+    memset(c,0,sizeof(c));  
+    for(int i=1;i<=n;i++){  
+        if(!c[i]){  
+            if(!dfs(i)){  
+                return false;  
+            }  
+        }  
+    }  
+    return true;  
+}  
+  
+void out()  
+{  
+    cout<<top[0];  
+    for(int i=1;i<n;i++){  
+        cout<<" "<<top[i];  
+    }  
+    cout<<endl;  
+}  
+  
+int main()  
+{  
+    //freopen("in.txt","r",stdin);  
+    //freopen("out.txt","w",stdout);  
+    while(cin>>n>>m)  
+    {  
+        if(n==0&&m==0)  break;  
+        memset(G,0,sizeof(G));  
+        memset(top,0,sizeof(top));  
+        int start,stop;  
+        for(int i=1;i<=m;i++){  
+            cin>>start>>stop;  
+            G[start][stop]=1;  
+        }  
+        if(topsort())   out();  
+    }  
+    return 0;  
+}  
+  
+</span>

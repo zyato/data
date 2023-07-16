@@ -1,0 +1,61 @@
+/*
+用途：有一个首位相连的字符串，我们要寻找一个位置，从这个位置向后形成一个新字符串，我们需要使这个字符串字典序最大（小）。
+复杂度: O(n)。
+      例子：  i  i+k
+            A A A C A A B D D A A C A A B D D(原始字符串加倍)
+                    j  j+k
+            A A A C A A B D D A A C A A B D D(原始字符串加倍)
+      假设，i = 1, j = 4, k = 2. 现在s[i+k)>s[j+k], 即，string(i)>string(j), 则有，string(i+1)>string(j+1)
+	string(i+2)>string(j+2)......string(i+k)>string(j+k).
+      因此，下次只需要比较string(i+k+1)和string(j)的大小， 即,i=i+k+1.
+*/
+#include<bits/stdc++.h>
+using namespace std;
+const int maxn = 1e6 + 7;
+char str[maxn];
+int GetMin(char s[]) {
+	int i = 0, j = 1, k = 0;
+	int len = strlen(s);
+	while (i < len&&j < len&&k < len) {
+		int t = s[(i + k) % len] - s[(j + k) % len];
+		if (t == 0)k++;
+		else {
+			if (t > 0)i = i + k + 1;
+			else j = j + k + 1;
+			if (i == j)j++;
+			k = 0;
+		}
+	}
+	return min(i, j);
+}
+int GetMax(char s[]) {
+	int i = 0, j = 1, k = 0;
+	int len = strlen(s);
+	while (i < len&&j < len&&k < len) {
+		int t = s[(i + k) % len] - s[(j + k) % len];
+		if (t == 0)k++;
+		else {
+			if (t > 0)j = j + k + 1;
+			else i = i + k + 1;
+			if (i == j)j++;
+			k = 0;
+		}
+	}
+	return i < j ? i : j;
+}
+int main() {
+	scanf("%s", str);
+	int mi = GetMin(str), len = strlen(str);
+	for (int i = 0; i < len; ++i) {
+		printf("%c", str[mi++]);
+		if (mi == len)mi = 0;
+	}
+	cout << endl;
+	int ma = GetMax(str);
+	for (int i = 0; i < len; ++i) {
+		printf("%c", str[ma++]);
+		if (ma == len)ma = 0;
+	}
+	cout << endl;
+	return 0;
+}

@@ -1,0 +1,64 @@
+#include <algorithm>
+#include <iostream>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <time.h>
+
+using namespace std;
+const int maxn=100;
+bool v[maxn];
+int ans[maxn];
+
+void data()
+{
+    freopen("out.txt","w",stdout);
+    srand((unsigned int)time(NULL));
+    int T=10;
+    cout<<T<<endl;
+    while(T--)
+    {
+        cout<<rand()%100<<endl;
+    }
+}
+
+void init()
+{
+    for(int k=1;k<14;k++){
+        int n=2*k;
+        for(int m=k+1;;m++){
+            int start=0,kill=0;
+            memset(v,0,sizeof(v));
+            while(kill<k)
+            {
+                int step=m%(n-kill);
+                if(step==0) step=n-kill;
+                for(int i=1;i<=step;){
+                    start++;
+                    if(start>n)  start=1;
+                    if(!v[start]) i++;
+                }
+                if(start<=k)    break;
+                kill++;
+                v[start]=true;
+            }
+            if(kill==k){
+                ans[k]=m;
+                break;
+            }
+        }
+    }
+}
+
+int main()
+{
+    //freopen("in.txt","r",stdin);
+    //data();
+    int k;
+    init();
+    while(cin>>k&&k)
+    {
+        cout<<ans[k]<<endl;
+    }
+    return 0;
+}

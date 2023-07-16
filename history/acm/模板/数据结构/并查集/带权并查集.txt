@@ -1,0 +1,58 @@
+#include <map>
+#include <cmath>
+#include <stack>
+#include <vector>
+#include <string>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+const int maxn=100000+100;
+int n,m,q,a,b,c;
+int father[maxn],value[maxn];
+
+int Search(int x)
+{
+    if(father[x]==x)    return x;
+    int fa=father[x];
+    father[x]=Search(father[x]);
+    value[x]+=value[fa];
+    return father[x];
+}
+
+void Union(int a,int b,int c)
+{
+    int roota=Search(a);
+    int rootb=Search(b);
+    if(roota==rootb)    return;
+    father[roota]=rootb;
+    value[roota]=value[b]-value[a]+c;
+}
+
+int main()
+{
+//    freopen("in.txt","r",stdin);
+//    freopen("out.txt","w",stdout);
+    while(cin>>n>>m>>q)
+    {
+        for(int i=1;i<=n;i++){
+            father[i]=i;
+            value[i]=0;
+        }
+        for(int i=1;i<=m;i++){
+            cin>>a>>b>>c;
+            Union(a,b,c);
+        }
+        for(int i=1;i<=q;i++){
+            cin>>a>>b;
+            if(Search(a)!=Search(b)){
+                cout<<-1<<endl;
+            } else {
+                cout<<value[a]-value[b]<<endl;
+            }
+        }
+    }
+    return 0;
+}

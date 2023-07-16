@@ -1,0 +1,96 @@
+#include<cstdio>  
+#include<cstring>  
+#include<cmath>  
+#include<cstdlib>  
+#include<iostream>  
+#include<algorithm>  
+#include<sstream>  
+#include<fstream>  
+#include<vector>  
+#include<map>  
+#include<stack>  
+#include<list>  
+#include<set>  
+#include<queue>  
+#define LL long long  
+#define lson l,m,rt<<1  
+#define rson m+1,r,rt<<1 | 1  
+using namespace std;  
+const int maxn=100005,inf=1<<29;  
+int dir[][2]={ {0,1},{-1,0},{0,-1},{1,0},{-1,1},{-1,-1},{1,-1},{1,1}};  
+int n,m,t;  
+double EPS=1e-10;  
+double add(double a,double b)  
+{  
+    if(abs(a+b)<EPS*(abs(a)+abs(b))) return 0;  
+    return a+b;  
+}  
+struct P  
+{  
+    double x,y;  
+    P(){}  
+    P(double x,double y):x(x),y(y){}  
+    P operator +(P p)  
+    {  
+        return P(add(x,p.x),add(y,p.y));  
+    }  
+    P operator -(P p)  
+    {  
+        return P(add(x,-p.x),add(y,-p.y));  
+    }  
+    P operator *(double d)  
+    {  
+        return P(x*d,y*d);  
+    }  
+    double dot(P p)//内积  
+    {  
+        return add(x*p.x,y*p.y);  
+    }  
+    double det(P p)//外积  
+    {  
+        return add(x*p.y,-p.x*y);  
+    }  
+};  
+struct v  
+{  
+    P p,q;  
+}a[maxn];  
+bool on_seg(P p1,P p2,P q)//判断点q是否在线段p1p2上  
+{  
+    return (p1-q).det(p2-q)==0&&(p1-q).dot(p2-q)<=0;  
+}  
+P intersection(P p1,P p2,P q1,P q2)//计算两线段的交点  
+{  
+    return p1+(p2-p1)*((q2-q1).det(q1-p1)/(q2-q1).det(p2-p1));  
+}  
+bool judge(v s1,v s2)  
+{  
+    if((s1.p-s1.q).det(s2.p-s2.q)==0)  
+    {  
+        return on_seg(s1.p,s1.q,s2.p)||  
+                    on_seg(s1.p,s1.q,s2.q)||  
+                    on_seg(s2.p,s2.q,s1.p)||  
+                    on_seg(s2.p,s2.q,s1.q);  
+    }  
+    else  
+    {  
+        P r=intersection(s1.p,s1.q,s2.p,s2.q);  
+        //cout<<"x = "<<r.x<<" y= "<<r.y<<endl;  
+        return on_seg(s1.p,s1.q,r)&&on_seg(s2.p,s2.q,r);  
+    }  
+}  
+int main()  
+{  
+  
+    while(cin>>n,n)  
+    {  
+        for(int i=0;i<n;i++) cin>>a[i].p.x>>a[i].p.y>>a[i].q.x>>a[i].q.y;  
+        //cin>>s2.p.x>>s2.p.y>>s2.q.x>>s2.q.y;  
+        int cnt=0;  
+        for(int i=0;i<n;i++)  
+            for(int j=i+1;j<n;j++)  
+            if(judge(a[i],a[j])) cnt++;  
+        cout<<cnt<<endl;  
+    }  
+    return 0;  
+}

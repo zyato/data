@@ -1,0 +1,138 @@
+今天啃掉了网络流经典问题最大流的Dinic算法，一直想搞网络流但之前看书的状态都不对，心浮气躁，没仔细看就觉得难，结果束之高阁了。人做不成事到底还是缺决心啊！回顾学习的过程，我看懂Dinic的算法过程没太费事，大部分时间都耗在代码的理解上了，因为之前没写过网络流的题，所以我连建图都不清楚，还寻思用邻接表存残量网络怎么快速定位一条边的反向边。这些坎到底是迈过来了。下面进入正题。
+
+
+  概述
+
+Dinic算法是在最大流算法中属于增广路系列的算法，并且是“最短增广路算法”。这里不加证明地给出它的复杂度：O(n^2*m)。从集训队前辈那里得知网络流算法的复杂度其实是很难准确计算的，在实测中的运行结果常常比理论估计要好得多，要知道网络流的题数据是不太好构造的，事实上图论的题数据都不好构造，大部分数据是随机数据，因此不必对最大流算法的复杂度上限感到悲观。值得一提的是，一些恰当的优化会大大提高算法的效率。网络流的算法如果不小心写挫了，效率会倒退好多好多。
+
+  算法提要
+
+Dinic算法的核心是通过引入分层标号来构造层次图，具体方式是BFS。所谓分层标号就是BFS从源点出发访问到各个顶点的时间，广度优先的遍历方式具有鲜明的层次性。Dinic算法增广的策略是用DFS进行多路增广，一次找多条增广路，更新多次当前最大流的值。每次多路增广前都要重新计算分层标号，因为增广后残量网络会变。
+
+  代码解析
+
+题目：POJ1459 多源点多汇点模型
+
+Dinic算法模板来自《算法竞赛入门经典——训练指南》，ACMer们更喜欢称之为“大白书”。
+
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <vector>
+#include <queue>
+#include <cmath>
+using namespace std;
+
+const int MAXN = 105;
+const int INF = 1<<30;
+
+struct Edge
+{
+    int to, cap;
+};
+int n,m,s,t, np,nc;
+vector<Edge> edge;
+vector<int>  G[MAXN];
+int d[MAXN], cur[MAXN];
+
+void AddEdge(int from, int to, int cap)
+{
+    edge.push_back((Edge){to, cap});//这里调用了结构体缺省的构造函数，代码很简洁，下面也是
+    edge.push_back((Edge){from, 0});
+    int id = edge.size();
+    G[from].push_back(id-2);
+    G[to].push_back(id-1);
+}
+
+//bfs函数我做了调整，用距离标号数组d代替了书中的vis数组。另外d[s]改成了1，这个不影响。
+bool bfs()
+{
+    memset(d, 0, sizeof(d));
+    queue<int> Q;
+    Q.push(s);
+    d[s] = 1;
+    while(!Q.empty())
+    {
+        int x = Q.front(); Q.pop();
+        if(x == t) return true;
+        for(int i=0; i<G[x].size(); i++)
+        {
+            Edge& e = edge[G[x][i]];
+            if(!d[e.to] && e.cap>0)//邻接点未访问且该边残量不为零
+            {
+                d[e.to] = d[x]+1;
+                Q.push(e.to);
+            }
+        }
+    }
+    return false;
+}
+
+int dfs(int x, int a)//x是当前遍历的点，a是目前为止所有弧的最小残量
+{
+    if(x == t || a == 0) return a;
+    int flow = 0, f;
+    for(int& i=cur[x]; i<G[x].size(); i++)//使用引用变量在遍历x所有邻接点的同时顺便修改了cur[x]的值，实现得很妙
+    {
+        Edge& e = edge[G[x][i]];
+        if(d[x]+1 == d[e.to] && (f=dfs(e.to, min(a, e.cap)))>0)
+        {
+            e.cap -= f;
+            edge[G[x][i]^1].cap += f;//^1 是定位残量网络中反向边的方法
+            flow += f;
+            a -= f;
+            if(a == 0) break;
+        }
+    }
+    return flow;
+}
+
+int Maxflow()//dinic
+{
+    int flow = 0;
+    while(bfs())
+    {
+        memset(cur, 0, sizeof(cur));
+        flow += dfs(s, INF);
+    }
+    return flow;
+}
+
+int main()
+{
+    char str[20];
+    int u,v,w;
+    while(scanf("%d%d%d%d", &n,&np,&nc,&m)!=EOF)
+    {
+        s = n+1;
+        t = n+2;
+        for(int i=0;i<n+2;i++) G[i].clear();
+        edge.clear();
+        for(int i=0;i<m;i++)//读入边信息
+        {
+            scanf("%s", str);
+            sscanf(str, "%*c%d%*c%d%*c%d", &u,&v,&w);
+            AddEdge(u,v,w);
+        }
+        for(int i=0;i<np;i++)//读入源点信息
+        {
+            scanf("%s", str);
+            sscanf(str, "%*c%d%*c%d", &u,&w);
+            AddEdge(s,u,w);
+        }
+        for(int i=0;i<nc;i++)//读入汇点信息
+        {
+            scanf("%s", str);
+            sscanf(str, "%*c%d%*c%d", &u,&w);
+            AddEdge(u,t,w);
+        }
+        printf("%d\n", Maxflow());
+    }
+    return 0;
+}
+
+注意：这份代码在POJ需要用G++编译项提交，用C++ CE了，错误信息出在edge.push_back((Edge){to, cap})，不明白，果断换G++过之。
+
+  图存储结构
+
+这份代码采用STL vector容器实现邻接表来存图，并直接用cap表示残量。值得注意的是，网络流的题经常会有重边（这道题就有）。

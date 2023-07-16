@@ -1,0 +1,106 @@
+不要62
+Time Limit: 1000/1000 MS (Java/Others)    Memory Limit: 32768/32768 K (Java/Others)
+Total Submission(s): 45951    Accepted Submission(s): 17341
+
+
+Problem Description
+杭州人称那些傻乎乎粘嗒嗒的人为62（音：laoer）。
+杭州交通管理局经常会扩充一些的士车牌照，新近出来一个好消息，以后上牌照，不再含有不吉利的数字了，这样一来，就可以消除个别的士司机和乘客的心理障碍，更安全地服务大众。
+不吉利的数字为所有含有4或62的号码。例如：
+62315 73418 88914
+都属于不吉利号码。但是，61152虽然含有6和2，但不是62连号，所以不属于不吉利数字之列。
+你的任务是，对于每次给出的一个牌照区间号，推断出交管局今次又要实际上给多少辆新的士车上牌照了。
+ 
+
+Input
+输入的都是整数对n、m（0<n≤m<1000000），如果遇到都是0的整数对，则输入结束。
+ 
+
+Output
+对于每个整数对，输出一个不含有不吉利数字的统计个数，该数值占一行位置。
+ 
+
+Sample Input
+1 100
+0 0
+ 
+
+Sample Output
+80
+ 
+
+Author
+qianneng
+ 
+
+Source
+迎接新学期——超级Easy版热身赛
+ 
+
+Recommend
+lcy   |   We have carefully selected several similar problems for you:  2094 2090 2091 2093 2092 
+
+题目大意：现在给出一个区间，求出在这个区间内的数（数位上不能有4，不能出现连续的62）的数量。
+
+题目分析：求某一区间某一性质的数的数量，明显的数位dp的题，初次接触这种题，还在学习当中...
+
+代码：
+[cpp] view plain copy
+<span style="font-size:18px;">#include <iostream>  
+#include <string.h>  
+#include <stdio.h>  
+  
+using namespace std;  
+const int maxn=10;  
+int dp[maxn][maxn];  
+  
+void init()  
+{  
+    memset(dp,0,sizeof(dp));  
+    dp[0][0]=1;  
+    for(int i=1;i<=7;i++){  
+        for(int j=0;j<=9;j++){  
+            for(int k=0;k<=9;k++){  
+                if(j!=4&&!(j==6&&k==2)){  
+                    dp[i][j]=dp[i][j]+dp[i-1][k];  
+                }  
+            }  
+        }  
+    }  
+}  
+  
+int solve(int n)  
+{  
+    int len=0,ans=0;  
+    int digit[maxn];  
+    while(n)  
+    {  
+        digit[++len]=n%10;  
+        n/=10;  
+    }  
+    digit[len+1]=0;  
+    for(int i=len;i>=1;i--){  
+        for(int j=0;j<digit[i];j++){  
+            if(j!=4&&!(digit[i+1]==6&&j==2)){  
+                ans+=dp[i][j];  
+            }  
+        }  
+        if(digit[i]==4||(digit[i]==2&&digit[i+1]==6))   break;  
+    }  
+    return ans;  
+}  
+  
+int main()  
+{  
+    //freopen("in.txt","r",stdin);  
+    //freopen("out->txt","w",stdout);  
+    init();  
+    int l,r;  
+    while(scanf("%d%d",&l,&r)!=EOF)  
+    {  
+        if(l==0&&r==0)   break;  
+        printf("%d\n",solve(r+1)-solve(l));  
+    }  
+    return 0;  
+}  
+</span> 

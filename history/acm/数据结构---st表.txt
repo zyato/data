@@ -1,0 +1,72 @@
+/*
+算法：st表
+处理问题：区间最值查询问题，序列元素不能动态变化。（序列元素变化的需要线段树）
+时间复杂度：
+        初始化st表的时间复杂度 nlog(n)；
+        查询的时间复杂度 O(1);
+        总复杂度：nlog(n) + m;
+与线段树算法对比：
+                1. 处理问题：线段树能处理元素动态变化的情况，st表只能处理元素固定不变的情况。
+                2. 时间复杂度：线段树构建为 nlog(n)，修改元素和查询都为log(n)；
+                               st表构建为 nlog(n)，查询为O(1)，不能修改元素。
+                3. st表容易构建。且查询更优。
+时间：2020年7月30日 10:31:41
+*/
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+const int maxn = 1010; // 数组最大长度。
+const int stlen = 20; // stlen = log2(maxn);
+int a[maxn];// 原始输入数组, 从下标1开始。
+int lg[maxn]; // log2(n)向下取整。
+int st[maxn][stlen];//st表。st[i][j]表示从i下标开始，长度为2^j的区间最值，即a[i, i + 2^j - 1]的最值。
+
+void init() {
+    lg[0] = -1;
+    for (int i = 1; i < maxn; i++) {
+        lg[i] = lg[i / 2] + 1;
+    }
+}
+void getSt(int n) {
+    for (int i = 1; i <= n; i++) {
+        st[i][0] = a[i]; // a[i, i + 2^0 - 1] = a[i, i]
+    }
+    for (int i = 1; i <= lg[n]; i++)
+    {
+        for (int j = 1; j + (1 << i) - 1 <= n; j++)
+            // a[j, j + 2^i - 1] = max( a[j, j + 2^(i - 1) - 1], a[j + 2^(i - 1), j + 2^(i - 1) + 2^(i - 1) - 1] );
+            // 把长度为 2^i 的区间分成 2 个长度为 2^(i - 1) 的区间。
+            st[j][i] = max(st[j][i - 1], st[j + (1 << (i - 1))][i - 1]);
+    }
+}
+int search(int l, int r)
+{
+    //int k = (int)(log((double)(r - l + 1)) / log(2.0));
+    int k = lg[r - l + 1]; 
+    // st[l][k]所指代区间为 a[l, r1], r1 <= r;
+    // st[r - 2^k + 1][k]所指代区间为 a[l1, r], l1 >= l1;
+    return max(st[l][k], st[r - (1 << k) + 1][k]);
+}
+
+int main()
+{
+    freopen("in.txt", "r", stdin);
+    int n, m, T; cin >> T;
+    init();
+    while (T--)
+    {
+        cin >> n;
+        for (int i = 1; i <= n; i++)
+            cin >> a[i];
+        getSt(n);
+        cin >> m;
+        while (m--)
+        {
+            int l, r;
+            cin >> l >> r;
+            cout << search(l, r) << endl;;
+        }
+    }
+    return 0;
+}

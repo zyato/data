@@ -1,0 +1,102 @@
+#include <bits/stdc++.h>
+using namespace std;
+const int maxn = 1010;
+const int maxv = 20010;
+int cost[maxn], val[maxn], num[maxn], dp[maxv];
+void zeroOnePack(int cos, int va, int capacity) {
+    /*
+        // 01背包的常数优化，只适用于最后需要dp[n]的情况，如果还需要dp[i](i < n)的值，此方法不适用。
+        int sum = cost[1到n];
+        for(int i = 1; i <= n; ++i)
+        {
+            // 如果最后的 n - i 件物品都选，剩余的背包容量就是 v - sum，所以说，如果只需要dp[n]的结果，
+                当前次，只有 背包剩余容量大于 v - sum 才有可能更新更新dp[n]的值。 小于 v - sum的值不需要求出。
+                因此，只能保证dp[n]的正确性。
+            sum -= cost[i];//sum为cost[i]的总和
+            int down = max(v - sum, cost[i]);
+            for(int j = v; j >= down; --j)
+                dp[j] = max(dp[j - cost[i]] + val[i], dp[j]);
+        }
+    */
+    for (int j = capacity; j >= cos; j--)
+        dp[j] = max(dp[j - cos] + va, dp[j]);
+}
+void completePack(int cos, int va, int capacity) {
+    for (int j = cos; j <= capacity; j++)
+        dp[j] = max(dp[j - cos] + va, dp[j]);
+    // 以上代码等价于以下代码，但是时间复杂度降低了一维。
+
+    /*
+        for (int j = v; j >= cos; j--) { // 类似于01背包的枚举方式
+            for (int k = 0; k * cos <= j; k++) { // 枚举选择的个数。
+                dp[j] = max(dp[j], dp[j - k * cos] + k * va);
+                // 由于 dp[j - k * cos] + k * va 表示 前 i - 1 个物品，容量是 j - k * cos 的最大值
+                // 又由于 dp[j - cos] 一定是 前 i - 1 个物品， 容量是 j - (k - 1) * cos 的最大值。
+                // 所以，如果先算出 dp[j - cos], 那么，dp[j] = max(dp[j - cos] + va, dp[j])
+            }
+        }
+    */
+}
+void multiplyPack(int cos, int va, int cnt, int capacity) { // O(n*v*log(cnt))
+    if (cos * cnt >= capacity)
+        completePack(cos, va, capacity);
+    else {
+        /*
+        拆分成能组成所有选择个数的情况，即 1, 2, 4, 8, ... 和 cnt 剩余的值能组合成1-cnt的任意数，
+        也即是能表示所有可以选择的个数情况。
+        */
+        int x = 1;
+        while (x < cnt) {
+            zeroOnePack(cos * x, va * x, capacity);
+            cnt -= x;
+            x <<= 1;
+        }
+        if (cnt)
+            zeroOnePack(cos * cnt, va * cnt, capacity);
+    }
+}
+
+
+struct node {
+    int pos, val;
+}que[maxv];
+
+int multiplyPackAndQueue(int n, int capacity) { // 传入物品数量和背包容量，返回最大价值 O(n * capacity)
+
+    for (int i = 1; i <= n; i++) { // 枚举物品
+        for (int j = 0; j < cost[i]; ++j) { // 枚举模数
+            int hh = 0, tt = 0, stop = (capacity - j) / cost[i];
+            //[hh, tt)
+            for (int k = 0; k <= stop; ++k) {
+                int va = dp[k * cost[i] + j] - k * val[i];
+                while (hh < tt && va >= que[tt - 1].val) --tt;
+                que[tt].pos = k, que[tt++].val = va;
+                if (que[hh].pos < k - num[i]) ++hh;
+                dp[cost[i] * k + j] = que[hh].val + k * val[i];
+            }
+        }
+    }
+    return dp[capacity];
+}
+
+
+int main()
+{
+    freopen("in.txt", "r", stdin);
+    int n, capacity;
+    cin >> n >> capacity;
+    for (int i = 1; i <= n; i++) cin >> cost[i] >> val[i] >> num[i];
+    memset(dp, 0, sizeof(dp));
+    /*
+        初始化问题：
+            1. 如果 dp 的所有值都初始化为 0， dp[i] 表示占用背包的体积 <= i 的最大价值;
+            2. 如果 只把 dp[0][0] 初始化为 0， 其余值初始化为 -inf , 则 dp[i] 表示占用背包的体积 恰好 == i 的最大价值。
+                因为：当 dp[i - cost[i]] 为 -inf 时，表示，前面的状态没有出现恰好占用体积是 i - cost[i] 的情况，因此也就转移不到占用体积恰好是 i 的情况，max (dp[i - cost[i], dp[i]) 仍是 -inf。但是，如果为 dp[i - cost[i]]赋值为 0， 虽然前面状态没有转移到 i - cost[i]，但 max (dp[i - cost[i], dp[i]) = val[i]，是可以取到的，即表示 体积 <= i 的最大价值。
+
+    */
+    for (int i = 1; i <= n; i++) {
+        multiplyPack(cost[i], val[i], num[i], capacity);
+    }
+    cout << dp[capacity] << endl;
+    return 0;
+}

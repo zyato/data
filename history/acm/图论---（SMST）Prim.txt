@@ -1,0 +1,75 @@
+#include<iostream>
+#include <cstring>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int edge[105][105], line[105], pre[105], maxedge[105][105], ans, n, m;
+bool visit[105];
+
+void prim() {
+	int minval, row;
+	vector<int> vec;
+	for (int i = 1; i <= n; ++i) {
+		line[i] = edge[1][i];
+		pre[i] = 1;
+	}
+	visit[1] = true;
+	vec.push_back(1);
+	pre[1] = -1;
+	for (int i = 1; i < n; ++i) {
+		minval = 0x3f3f3f3f;
+		for (int j = 2; j <= n; ++j) {
+			if (!visit[j] && line[j] < minval) {
+					minval = line[j];
+					row = j;			
+			}
+		}
+		visit[row] = true;
+		ans += minval;
+		//pre[row] = *(vec.end() - 1);
+		for (int j = 0; j < vec.size(); ++j) {
+			maxedge[vec[j]][row] = maxedge[row][vec[j]] = max(maxedge[pre[row]][vec[j]], minval);
+		}
+		vec.push_back(row);
+		for (int j = 2; j <= n; ++j) {
+			if (!visit[j] && edge[row][j] < line[j]) {
+				line[j] = edge[row][j];
+				pre[j] = row;
+			}
+		}
+	}
+}
+
+int main() {
+	int T, a, b, c;
+	scanf("%d", &T);
+	while (T--) {
+		scanf("%d%d", &n, &m);
+		memset(maxedge, 0, sizeof(maxedge));
+		memset(visit, false, sizeof(visit));
+		memset(edge, 0x3f, sizeof(edge));
+		for (int i = 0; i < m; ++i) {
+			scanf("%d%d%d", &a, &b, &c);
+			edge[a][b] = c;
+			edge[b][a] = c;
+		}
+		ans = 0;
+		prim();
+		for (int i = 1; i <= n; ++i) {
+			for (int j = 1; j <= n; ++j) {
+				if (i != j && i != pre[j] && j != pre[i]) {
+					if (edge[i][j] == maxedge[i][j]) {
+						printf("Not Unique!\n");
+						goto out;
+					}
+				}
+			}
+		}
+		printf("%d\n", ans);
+	out:;
+	}
+
+	return 0;
+}

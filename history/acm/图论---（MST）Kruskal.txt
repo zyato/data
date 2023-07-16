@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+using namespace std;
+//克鲁斯卡尔
+const int maxn = 110;//最大点数
+const int maxm = 10000;//最大边数
+int F[maxn];//并查集的使用, F[i]表示i节点所在集合的第一个元素
+struct node {
+	int u, v, w;
+}edge[maxm];//存储边的信息， 包括起点/终点/权值
+int tol;//边数， 加边前复制为0
+void addedge(int u, int v, int w) {
+	edge[tol].u = u;
+	edge[tol].v = v;
+	edge[tol++].w = w;
+}
+bool cmp(node &a, node &b) {//排序函数， 将边按照权值从小到大排序
+	return a.w < b.w;
+}
+int myfind(int x) {
+	if (F[x] == -1)return x;//F[x]==-1表示x是x所在集合的第一个元素，返回首元素即可；
+	return F[x] = myfind(F[x]);//x不是首元素， 递归查找x所在集合的首元素， 并把首元素复制给F[x];
+}
+int Kruskal(int n) {//传入点数， 返回最小生成树的权值， 如果不连通返回-1
+	memset(F, -1, sizeof(F));
+	sort(edge, edge + tol, cmp);
+	int cnt = 0;//计算加入的边数
+	int ans = 0;
+	for (int i = 0; i < tol; i++) {
+		int u = edge[i].u;
+		int v = edge[i].v;
+		int w = edge[i].w;
+		int t1 = myfind(u);//查找u所在集合首元素
+		int t2 = myfind(v);//查找v所在集合首元素
+		if (t1 != t2) {//如果u、v不在同一个集合， 把u所在集合合并到v所在集合后面
+			ans += w;
+			F[t1] = t2;
+			cnt++;
+		}
+		if (cnt == n - 1)break;//节点数为n, 需要查找到n-1条边， 找到即完成
+	}
+	if (cnt < n - 1)return -1;//不连通
+	return ans;
+}

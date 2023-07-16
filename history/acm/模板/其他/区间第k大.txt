@@ -1,0 +1,91 @@
+#include<cstring>  
+#include<cmath>  
+#include<cstdlib>  
+#include<ctime>  
+#include<iostream>  
+#include<algorithm>  
+#include<sstream>  
+#include<fstream>  
+#include<vector>  
+#include<map>  
+#include<stack>  
+#include<list>  
+#include<set>  
+#include<queue>  
+#define LL long long  
+#define lson l,m,rt<<1  
+#define rson m+1,r,rt<<1 | 1  
+using namespace std;  
+const int B=1000,maxn=100005;  
+int n,m;  
+int a[maxn],nums[maxn];  
+int L[maxn],R[maxn],K[maxn];  
+vector<int>dat[maxn<<2];  
+void PushUp(int rt)  
+{  
+    merge(dat[rt<<1].begin(),dat[rt<<1].end(),dat[rt<<1|1].begin(),dat[rt<<1|1].end(),dat[rt].begin());  
+}  
+void build(int l,int r,int rt)  
+{  
+    dat[rt].clear();  
+    if(l==r)  
+    {  
+        int x;  
+        //scanf("%d",&x);  
+        //printf("[%d,%d] = x = %d\n",l,r,a[l-1]);  
+        dat[rt].push_back(a[l-1]);  
+        return ;  
+    }  
+    int m=(l+r)>>1;  
+    build(lson);  
+    build(rson);  
+    dat[rt].resize(r-l+1);  
+    PushUp(rt);  
+}  
+int Query(int L,int R,int x,int l,int r,int rt)  
+{  
+    if(L<=l&&r<=R)  
+    {  
+        return upper_bound(dat[rt].begin(),dat[rt].end(),x)-dat[rt].begin();  
+    }  
+    int m=(l+r)>>1,sum=0;  
+    if(L<=m) sum+=Query(L,R,x,lson);  
+    if(R>m) sum+=Query(L,R,x,rson);  
+    return sum;  
+}  
+int ask(int l,int r,int x)  
+{  
+  
+}  
+void solve()  
+{  
+    sort(a,a+n);  
+    for(int i=0;i<m;i++)  
+    {  
+            int l=0,r=n-1,ans;  
+            while(l<r)  
+            {  
+                int mid=(l+r)>>1;  
+                int x=a[mid],c=Query(L[i],R[i],x,1,n,1);  
+                if(c<K[i]) l=mid+1;  
+                else r=mid;  
+            }  
+            printf("%d\n",a[r]);  
+    }  
+}  
+int main()  
+{  
+    //freopen("in.txt","r",stdin);  
+     //freopen("out.txt","w",stdout);  
+     int t;  
+     scanf("%d",&t);  
+    while(t--)  
+    {  
+        scanf("%d%d",&n,&m);  
+        for(int i=0;i<n;i++) scanf("%d",&a[i]);  
+        build(1,n,1);  
+        for(int i=0;i<m;i++) scanf("%d%d%d",&L[i],&R[i],&K[i]);  
+        solve();  
+    }  
+    return 0;  
+} 

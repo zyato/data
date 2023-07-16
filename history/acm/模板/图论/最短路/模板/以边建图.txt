@@ -1,0 +1,112 @@
+#include <set>
+#include <queue>
+#include <vector>
+#include <math.h>
+#include <string>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+#define ll long long
+#define ull unsigned long long
+#define cls(x) memset(x,0,sizeof(x))
+#define clslow(x) memset(x,-1,sizeof(x))
+
+const int mod=1e9+7;
+const int maxn=1e5+100;
+const int maxm=2e5+100;
+const int inf=0x3f3f3f3f;
+
+int n,m,tot;
+
+int d[maxm];
+bool done[maxm];
+vector<int>vertex[maxm];
+
+struct Edge{
+    int u,v,c;
+};
+Edge e[maxn<<1];
+
+struct HeapNode {
+    int id,d;
+    HeapNode(int id,int d):id(id),d(d){}
+    bool operator < (const HeapNode& rhs) const {
+        return d > rhs.d;
+    }
+};
+priority_queue<HeapNode>que;
+
+void init()
+{
+    for(int i=1;i<=n;i++){
+        vertex[i].clear();
+    }
+    for(int i=1;i<=m;i++){
+        d[i]=inf;
+        done[i]=false;
+    }
+    while(!que.empty()) que.pop();
+}
+
+void dijkstra(int s,int t)
+{
+    while(!que.empty())
+    {
+        HeapNode x=que.top();que.pop();
+        int id=x.id;
+        if(done[id]) continue;
+        done[id]=true;
+
+        int u=e[id].u,v=e[id].v;
+        int lenu=vertex[u].size();
+        int lenv=vertex[v].size();
+        for(int i=0;i<lenu;i++){
+            int eid=vertex[u][i];
+            int val=!(e[id].c==e[eid].c);
+            if(d[eid]>d[id]+val){
+                d[eid]=d[id]+val;
+                que.push(HeapNode(eid,d[eid]));
+            }
+        }
+        for(int i=0;i<lenv;i++){
+            int eid=vertex[v][i];
+            int val=!(e[id].c==e[eid].c);
+            if(d[eid]>d[id]+val){
+                d[eid]=d[id]+val;
+                que.push(HeapNode(eid,d[eid]));
+            }
+        }
+    }
+    int ans=inf;
+    int sz=vertex[t].size();
+    for(int i=0;i<sz;i++){
+        ans=min(ans,d[vertex[t][i]]);
+    }
+    if(ans==inf)    ans=-1;
+    printf("%d\n",ans);
+}
+
+int main()
+{
+    #ifndef ONLINE_JUDGE
+        freopen("in.txt","r",stdin);
+    #endif
+    while(scanf("%d %d",&n,&m)!=EOF)
+    {
+        init();
+        for(int i=1;i<=m;i++){
+            scanf("%d %d %d",&e[i].u,&e[i].v,&e[i].c);
+            if(min(e[i].u,e[i].v)==1){
+                d[i]=1;
+                que.push(HeapNode(i,d[i]));
+            }
+            vertex[e[i].u].push_back(i);
+            vertex[e[i].v].push_back(i);
+        }
+        dijkstra(1,n);
+    }
+    return 0;
+}

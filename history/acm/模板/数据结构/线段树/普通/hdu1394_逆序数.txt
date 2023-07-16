@@ -1,0 +1,126 @@
+Minimum Inversion Number
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 21479    Accepted Submission(s): 12860
+
+
+Problem Description
+The inversion number of a given number sequence a1, a2, ..., an is the number of pairs (ai, aj) that satisfy i < j and ai > aj.
+
+For a given sequence of numbers a1, a2, ..., an, if we move the first m >= 0 numbers to the end of the seqence, we will obtain another sequence. There are totally n such sequences as the following:
+
+a1, a2, ..., an-1, an (where m = 0 - the initial seqence)
+a2, a3, ..., an, a1 (where m = 1)
+a3, a4, ..., an, a1, a2 (where m = 2)
+...
+an, a1, a2, ..., an-1 (where m = n-1)
+
+You are asked to write a program to find the minimum inversion number out of the above sequences.
+ 
+
+Input
+The input consists of a number of test cases. Each case consists of two lines: the first line contains a positive integer n (n <= 5000); the next line contains a permutation of the n integers from 0 to n-1.
+ 
+
+Output
+For each case, output the minimum inversion number on a single line.
+ 
+
+Sample Input
+10
+1 3 6 9 0 8 5 7 4 2
+ 
+
+Sample Output
+16
+ 
+
+Author
+CHEN, Gaoli
+ 
+
+Source
+ZOJ Monthly, January 2003
+ 
+
+Recommend
+Ignatius.L   |   We have carefully selected several similar problems for you:  1698 1540 1542 1255 1754 
+
+题目大意：定义一个序列的逆序数的个数为满足i<j，a[i]>a[j]的个数。
+
+题目分析：这个题目多亏了学长的分析，感觉线段树自己学的还是不够熟练，还需要继续深入学习。建的是一棵空树，然后每插入一个点之前，统计大于这个数的有多少个，直到所有的数都插入完成，就结果了逆序树的统计。要得出答案主要是利用了一个结论，如果是0到n的排列，那么如果把第一个数放到最后，对于这个数列，逆序数是减少a[i],而增加n-1-a[i]的.
+
+代码：
+[cpp] view plain copy
+<span style="font-size:18px;">#include <iostream>  
+#include <cstdio>  
+#include <cstring>  
+#include <algorithm>  
+using namespace std;  
+#define lson l,m,rt<<1  
+#define rson m+1,r,rt<<1|1  
+const int maxn=5000+10;  
+int sum[maxn<<2],x[maxn];  
+  
+void PushUp(int rt)  
+{  
+    sum[rt]=sum[rt<<1]+sum[rt<<1|1];  
+}  
+  
+void build(int l,int r,int rt)  
+{  
+    sum[rt]=0;  
+    if(l==r){  
+        return;  
+    }  
+    int m=(l+r)>>1;  
+    build(lson);  
+    build(rson);  
+}  
+  
+void update(int p,int add,int l,int r,int rt)  
+{  
+    if(l==r){  
+        sum[rt]+=add;  
+        return;  
+    }  
+    int m=(l+r)>>1;  
+    if(p<=m)    update(p,add,lson);  
+    else        update(p,add,rson);  
+    PushUp(rt);  
+}  
+  
+int query(int L,int R,int l,int r,int rt)  
+{  
+    if(L<=l&&r<=R){  
+        return sum[rt];  
+    }  
+    int ans=0;  
+    int m=(l+r)>>1;  
+    if(L<=m)    ans+=query(L,R,lson);  
+    if(R>m)     ans+=query(L,R,rson);  
+    return ans;  
+}  
+  
+int main()  
+{  
+    //freopen("in.txt","r",stdin);  
+    //freopen("out.txt","w",stdout);  
+    int n;  
+    while(cin>>n)  
+    {  
+        int ans=0;  
+        build(0,n-1,1);  
+        for(int i=0;i<n;i++){  
+            cin>>x[i];  
+            ans+=query(x[i],n-1,0,n-1,1);  
+            update(x[i],1,0,n-1,1);  
+        }  
+        int sum=ans;  
+        for(int i=0;i<n;i++){  
+            sum+=n-x[i]-1-x[i];  
+            ans=min(ans,sum);  
+        }  
+        printf("%d\n",ans);  
+    }  
+    return 0;  
+}</span> 

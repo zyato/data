@@ -1,0 +1,54 @@
+#include <cmath>  
+#include <vector>  
+#include <string>  
+#include <stdio.h>  
+#include <string.h>  
+#include <iostream>  
+#include <algorithm>  
+using namespace std;  
+  
+///递归实现  
+void extend_gcd(int a,int b,int& d,int& x,int& y)  
+{  
+    if(!b){  
+        d=a;x=1;y=0;  
+    } else{  
+        extend_gcd(b,a%b,d,y,x);  
+        y-=x*(a/b);  
+    }  
+}  
+  
+///非递归实现  
+void extend_gcd_non(int m,int n,int& d,int& x,int& y)  
+{  
+    int x0=1,y0=0;  
+    int x1=0,y1=1;  
+    x=0,y=1;  
+    int r=m%n;  
+    int q=(m-r)/n;  
+    while(r)  
+    {  
+        x=x0-q*x1;y=y0-q*y1;  
+        x0=x1;y0=y1;  
+        x1=x;y1=y;  
+        m=n;n=r;r=m%n;  
+        q=(m-r)/n;  
+    }  
+    d=n;  
+}  
+  
+int main()  
+{  
+    //freopen("in.txt","r",stdin);  
+    //freopen("out.txt","w",stdout);  
+    int a,b,t,d,x,y;  
+    cin>>a>>b>>t;  
+    extend_gcd(a,b,d,x,y);  
+    cout<<a<<"x+"<<b<<"y="<<t<<"的一组解为："<<endl;  
+    cout<<"x="<<x*(t/d)<<" y="<<y*(t/d)<<endl;  
+    return 0;  
+}</span>  
+
+
+注：其他解为（x1+b/d*t,y1-a/d*t）.
+

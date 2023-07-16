@@ -1,0 +1,79 @@
+Agri-Net
+Time Limit: 1000MS	 	Memory Limit: 10000K
+Total Submissions: 57175	 	Accepted: 23719
+Description
+
+Farmer John has been elected mayor of his town! One of his campaign promises was to bring internet connectivity to all farms in the area. He needs your help, of course. 
+Farmer John ordered a high speed connection for his farm and is going to share his connectivity with the other farmers. To minimize cost, he wants to lay the minimum amount of optical fiber to connect his farm to all the other farms. 
+Given a list of how much fiber it takes to connect each pair of farms, you must find the minimum amount of fiber needed to connect them all together. Each farm must connect to some other farm such that a packet can flow from any one farm to any other farm. 
+The distance between any two farms will not exceed 100,000. 
+Input
+
+The input includes several cases. For each case, the first line contains the number of farms, N (3 <= N <= 100). The following lines contain the N x N conectivity matrix, where each element shows the distance from on farm to another. Logically, they are N lines of N space-separated integers. Physically, they are limited in length to 80 characters, so some lines continue onto others. Of course, the diagonal will be 0, since the distance from farm i to itself is not interesting for this problem.
+Output
+
+For each case, output a single integer length that is the sum of the minimum length of fiber required to connect the entire set of farms.
+Sample Input
+
+4
+0 4 9 21
+4 0 8 17
+9 8 0 16
+21 17 16 0
+Sample Output
+
+28
+
+题目分析：和poj2485差不多，只要稍微改一下输入就可以了，其他代码复制粘贴就行。。。水题，无语
+
+poj2485：传送门
+
+
+代码：
+
+
+[cpp] view plain copy
+<span style="font-family:Microsoft YaHei;font-size:18px;">#include <iostream>  
+#include <cstring>  
+  
+using namespace std;  
+#define size 600  
+#define MAX 999999  
+int main()  
+{  
+    int n;  
+    int a[size][size], visit[size];  
+    while (cin>>n)  
+    {  
+        long long sum=0;  
+        memset(visit, 0, sizeof(visit));      //把标记数组初始化为0 0 未访问过的节点  
+        for (int i = 1; i <= n; i++){  
+            for (int j = 1; j <= n; j++){  
+                cin >> a[i][j];  
+            }  
+        }  
+        visit[1] = 1;  
+        for (int t = 1; t < n; t++){  
+            int MIN =MAX, i1 = -1, j1 = -1;  
+            for (int i = 1; i <= n; i++){  
+                for (int j = i + 1; j <= n; j++){  
+                    if ((visit[i] + visit[j] == 1) && MIN>a[i][j]){     //找到最小权值  
+                        MIN = a[i][j];  
+                        i1 = i;  
+                        j1 = j;  
+                    }  
+                }  
+            }  
+            sum+=MIN;  
+            if (visit[i1] == 0){                //把被访问过的节点标记为1  
+                visit[i1] = 1;  
+            }  
+            else if (visit[j1] == 0){  
+                visit[j1] = 1;  
+            }  
+        }  
+        cout << sum << endl;  
+    }  
+    return 0;  
+}  
+</span> 

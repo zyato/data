@@ -1,0 +1,92 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+using namespace std;
+const int maxn = 20000+5;
+
+int n,m,tot,Log;
+int head[maxn],deep[maxn],p[maxn][30];
+
+struct node
+{
+    int v,next;
+}e[2*200000+5];
+
+void addEdge(int u, int v)
+{
+    e[tot].v = v;
+    e[tot].next = head[u];
+    head[u] = tot++;
+}
+
+void dfs(int u, int fa, int d)
+{
+    deep[u]=d;
+    p[u][0]=fa;
+    for(int i=head[u];i!=-1;i=e[i].next)
+    {
+        int v=e[i].v;
+        if(v==fa)  continue;
+        dfs(v,u,d+1);
+    }
+}
+
+void init()
+{
+    for(int j=1;j<=Log;j++)
+        for(int i=1;i<=n;i++)
+             p[i][j]=p[p[i][j-1]][j-1];
+}
+
+int LCA(int x, int y)
+{
+    if(x==y)  return x;
+    if(deep[x]<deep[y])  swap(x,y);
+    for(int i=Log;i>=0;i--)
+    {
+        if(deep[p[x][i]]>=deep[y])
+            x=p[x][i];
+    }
+    if(x==y)  return x;
+    for(int i=Log;i>=0;i--)
+    {
+        if(p[x][i]!=p[y][i])
+        {
+            x=p[x][i];y=p[y][i];
+        }
+    }
+    return p[x][0];
+}
+
+int main()
+{
+    //freopen("in.txt","r",stdin);
+    int T;
+    int kase = 0;
+    scanf("%d",&T);
+    while(T--)
+    {
+        tot = 0;
+        memset(head,-1,sizeof(head));
+        scanf("%d%d",&n,&m);
+        for(int i=1;i<=n-1;i++)
+        {
+            int u,v;
+            scanf("%d%d",&u,&v);
+            addEdge(u,v);
+            addEdge(v,u);
+        }
+
+        dfs(1,-1,0);
+        for(Log=0;(1<<Log)<=n+1;Log++);
+        Log--;
+        init();
+        for(int i=1;i<=m;i++){
+            int u,v;
+            scanf("%d%d",&u,&v);
+            int lca=LCA(u,v);
+        }
+    }
+    return 0;
+}

@@ -1,0 +1,117 @@
+古校园招聘开始！
+B-number
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 32768/32768 K (Java/Others)
+Total Submission(s): 7014    Accepted Submission(s): 4092
+
+
+Problem Description
+A wqb-number, or B-number for short, is a non-negative integer whose decimal form contains the sub- string "13" and can be divided by 13. For example, 130 and 2613 are wqb-numbers, but 143 and 2639 are not. Your task is to calculate how many wqb-numbers from 1 to n for a given integer n.
+ 
+
+Input
+Process till EOF. In each line, there is one positive integer n(1 <= n <= 1000000000).
+ 
+
+Output
+Print each answer in a single line.
+ 
+
+Sample Input
+13
+100
+200
+1000
+ 
+
+Sample Output
+1
+1
+2
+2
+ 
+
+Author
+wqb0039
+ 
+
+Source
+2010 Asia Regional Chengdu Site —— Online Contest
+ 
+
+Recommend
+lcy   |   We have carefully selected several similar problems for you:  3651 3655 3654 3653 3659 
+
+题目大意：现在给你一个n，求出1到n内（包括两端）内含有连续的“13”且能被13整除的数的个数。
+
+题目分析：一看就知道这是数位dp的题，然后就没有然后了，乖乖去膜了波大佬的代码...
+
+代码：
+[cpp] view plain copy
+#include <algorithm>  
+#include <iostream>  
+#include <string.h>  
+#include <stdio.h>  
+#include <queue>  
+#include <cmath>  
+  
+using namespace std;  
+typedef long long LL;  
+const int maxn=15;  
+int n;  
+int bit[maxn];  
+///i:位数 j:余数 k:是否出现了13  
+int dp[maxn][maxn][maxn];  
+  
+///pos:第几位  
+///mod:余数  
+///have:0:最后一位不是1 1:最后一位是1 2:出现了13  
+///limit:当前位上能出现的数的上限(0:能出现9 1:出现的数不能超过bit[pos])  
+int dfs(int pos,int mod,int have,int limit)  
+{  
+    int mod_x,have_x;  
+    if(pos<=0){  
+        return mod==0&&have==2;  
+    }  
+    if(!limit&&dp[pos][mod][have]!=-1){  
+        return dp[pos][mod][have];  
+    }  
+    int ans=0;  
+    int max_num=limit?bit[pos]:9;  
+    for(int i=0;i<=max_num;i++){  
+        have_x=have;  
+        mod_x=(mod*10+i)%13;  
+        if(i==1&&have==0){  
+            have_x=1;  
+        }  
+        if(i!=1&&have==1){  
+            have_x=0;  
+        }  
+        if(i==3&&have==1){  
+            have_x=2;  
+        }  
+        ans+=dfs(pos-1,mod_x,have_x,limit&&i==max_num);  
+    }  
+    if(!limit){  
+        dp[pos][mod][have]=ans;  
+    }  
+    return ans;  
+}  
+  
+int main()  
+{  
+    //freopen("in.txt","r",stdin);  
+    //freopen("out.txt","w",stdout);  
+    while(scanf("%d",&n)!=EOF)  
+    {  
+        int len=0;  
+        memset(dp,-1,sizeof(dp));  
+        memset(bit,0,sizeof(bit));  
+        while(n)  
+        {  
+            bit[++len]=n%10;  
+            n/=10;  
+        }  
+        printf("%d\n",dfs(len,0,0,1));  
+    }  
+    return 0;  
+}  

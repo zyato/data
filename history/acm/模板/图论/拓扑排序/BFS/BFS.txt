@@ -1,0 +1,64 @@
+[cpp] view plain copy
+<span style="font-family:Microsoft YaHei;font-size:18px;">#include <bits/stdc++.h>  
+  
+using namespace std;  
+const int maxn=200;  
+list<int>l[maxn];  
+list<int>::iterator it;  
+queue<int>que;  
+int in[maxn];  
+int n,m;  
+  
+void bfs_sort()  
+{  
+    for(int i=1;i<=n;i++){  
+        if(in[i]==0){  
+            que.push(i);  
+        }  
+    }  
+    int cnt=0;  
+    while(!que.empty())  
+    {  
+        int v=que.front();  
+        if(!cnt)    cout<<v;  
+        else        cout<<" "<<v;  
+        que.pop();  
+        cnt++;  
+        for(it=l[v].begin();it!=l[v].end();it++){  
+            if(!(--in[*it])){  
+                que.push(*it);  
+            }  
+        }  
+    }  
+    cout<<endl;  
+}  
+  
+void Remove()  
+{  
+    while(!que.empty())  
+    {  
+        que.pop();  
+    }  
+    for(int i=1;i<=n;i++){  
+        l[i].clear();  
+    }  
+}  
+  
+int main()  
+{  
+    //freopen("in.txt","r",stdin);  
+    //freopen("out.txt","w",stdout);  
+    while(cin>>n>>m)  
+    {  
+        memset(in,0,sizeof(in));  
+        int start,stop;  
+        for(int i=1;i<=m;i++){  
+            cin>>start>>stop;  
+            l[start].push_back(stop);  
+            in[stop]++;  
+        }  
+        bfs_sort();  
+        Remove();  
+    }  
+    return 0;  
+}</span>

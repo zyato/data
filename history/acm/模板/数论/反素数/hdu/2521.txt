@@ -1,0 +1,98 @@
+反素数
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 32768/32768 K (Java/Others)
+Total Submission(s): 6913    Accepted Submission(s): 4145
+
+
+Problem Description
+反素数就是满足对于任意i(0<i<x),都有g(i)<g(x),(g(x)是x的因子个数),则x为一个反素数。现在给你一个整数区间[a,b],请你求出该区间的x使g(x)最大。
+ 
+
+Input
+第一行输入n,接下来n行测试数据
+输入包括a,b, 1<=a<=b<=5000,表示闭区间[a,b].
+ 
+
+Output
+输出为一个整数,为该区间因子最多的数.如果满足条件有多个,则输出其中最小的数.
+ 
+
+Sample Input
+3
+2 3
+1 10
+47 359
+ 
+
+Sample Output
+2
+6
+240
+Hint
+
+2的因子为：1 2
+10的因子为:1 2 5 10
+ 
+ 
+
+Source
+HDU 2008-10 Programming Contest
+ 
+
+Recommend
+gaojie   |   We have carefully selected several similar problems for you:  2524 2520 2421 1395 2523 
+
+题目大意：给定一个区间，输出在这个区间上约数最多的数，如有多个数，输出最小的数。
+
+题目分析：基础的反素数模板题。
+
+代码：
+[cpp] view plain copy
+<span style="font-size:18px;">#include <cmath>  
+#include <vector>  
+#include <string>  
+#include <stdio.h>  
+#include <string.h>  
+#include <iostream>  
+#include <algorithm>  
+using namespace std;  
+typedef unsigned long long LL;  
+const LL INF=~0LL;  
+LL best,ans,l,r;  
+int p[16] = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53};  
+  
+void dfs(int depth,LL tmp,LL num)  
+{  
+    if(depth>=16)   return;  
+    if(num>best&&tmp>=l){  
+        best=num;  
+        ans=tmp;  
+    }  
+    if(num==best&&ans>tmp&&tmp>=l){  
+        ans=tmp;  
+    }  
+    for(int i=1;i<=63;i++){  
+        if(r/p[depth]<tmp)  break;  
+        dfs(depth+1,tmp*=p[depth],num*(i+1));  
+    }  
+}  
+  
+int main()  
+{  
+    //freopen("in.txt","r",stdin);  
+    //freopen("out.txt","w",stdout);  
+    int T;  
+    cin>>T;  
+    while(T--)  
+    {  
+        cin>>l>>r;  
+        ans=INF;  
+        best=0;  
+        dfs(0,1,1);  
+        if(ans==INF){  
+            cout<<l<<endl;  
+        } else {  
+            cout<<ans<<endl;  
+        }  
+    }  
+    return 0;  
+}</span> 

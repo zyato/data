@@ -1,0 +1,33 @@
+#include <cmath>
+#include <vector>
+#include <stdio.h>
+#include <iostream>
+
+using namespace std;
+typedef long long LL;
+const int maxn=50000+10;
+LL n,sum,pre_max,pre_min,MAX,MIN;
+LL num[maxn];
+
+int main()
+{
+//    freopen("in.txt","r",stdin);
+//    freopen("out.txt","w",stdout);
+    while(cin>>n)
+    {
+        sum=0;
+        for(int i=1;i<=n;i++){
+            cin>>num[i];
+            sum+=num[i];
+        }
+        pre_max=pre_min=MAX=MIN=num[1];
+        for(int i=2;i<=n;i++){
+            pre_max=max(pre_max+num[i],num[i]);
+            pre_min=min(pre_min+num[i],num[i]);
+            MAX=max(MAX,pre_max);
+            MIN=min(MIN,pre_min);
+        }
+        cout<<max(MAX,sum-MIN)<<endl;
+    }
+    return 0;
+}

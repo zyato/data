@@ -1,0 +1,223 @@
+#include <map>
+#include <queue>
+#include <math.h>
+#include <string>
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+#define ll long long
+#define ull unsigned long long
+#define cls(x) memset(x,0,sizeof(x))
+#define clslow(x) memset(x,-1,sizeof(x))
+
+const int maxn=1e5+100;
+
+int tot;
+int n,m,k;
+
+int arr[maxn];
+int head[maxn];
+
+struct Edge{
+    int v,nex;
+};
+Edge edge[maxn<<1];
+
+void init()
+{
+    tot=0;
+    clslow(head);
+}
+
+void addEdge(int u,int v)
+{
+    edge[tot].v=v;
+    edge[tot].nex=head[u];
+    head[u]=tot++;
+}
+
+namespace IntervalTree {
+    #define lson l,m,rt<<1
+    #define rson m+1,r,rt<<1|1
+    ll add[maxn<<2],sum[maxn<<2];
+    void PushUp(int rt)
+    {
+        sum[rt]=sum[rt<<1]+sum[rt<<1|1];
+    }
+    void PushDown(int m,int rt)
+    {
+        if(add[rt]){
+            add[rt<<1]+=add[rt];
+            add[rt<<1|1]+=add[rt];
+            sum[rt<<1]+=(m-(m>>1))*add[rt];
+            sum[rt<<1|1]+=(m>>1)*add[rt];
+            add[rt]=0;
+        }
+    }
+    void build(int l,int r,int rt)
+    {
+        add[rt]=0;
+        sum[rt]=0;
+        if(l==r)    return;
+        int m=(l+r)>>1;
+        build(lson);
+        build(rson);
+        PushUp(rt);
+    }
+    void update(int L,int R,int c,int l,int r,int rt)
+    {
+        if(L<=l&&r<=R){
+            add[rt]+=c;
+            sum[rt]+=c*(r-l+1);
+            return;
+        }
+        PushDown(r-l+1,rt);
+        int m=(l+r)>>1;
+        if(L<=m)    update(L,R,c,lson);
+        if(R>m)     update(L,R,c,rson);
+        PushUp(rt);
+    }
+    ll query(int L,int R,int l,int r,int rt)
+    {
+        if(L<=l&&r<=R){
+            return sum[rt];
+        }
+        PushDown(r-l+1,rt);
+        ll ans=0;
+        int m=(l+r)>>1;
+        if(L<=m)    ans+=query(L,R,lson);
+        if(R>m)     ans+=query(L,R,rson);
+        return ans;
+    }
+}
+
+namespace HLD {
+    int cnt;
+    int top[maxn<<1],rnk[maxn<<1],dfsid[maxn<<1];
+    int sz[maxn<<1],fa[maxn<<1],son[maxn<<1],dep[maxn<<1];
+    void init()
+    {
+        cnt=1;
+        cls(sz);
+        clslow(son);
+        IntervalTree::build(1,n,1);
+    }
+    void dfs1(int u,int father,int deep)
+    {
+        sz[u]=1;
+        dep[u]=deep;
+        fa[u]=father;
+        for(int i=head[u];~i;i=edge[i].nex){
+            int v=edge[i].v;
+            if(v==fa[u])   continue;
+            dfs1(v,u,deep+1);
+            sz[u]+=sz[v];
+            if(son[u]==-1||sz[v]>sz[son[u]]){
+                son[u]=v;
+            }
+        }
+    }
+    void dfs2(int u,int s)
+    {
+        top[u]=s;
+        dfsid[u]=cnt;
+        rnk[cnt++]=u;
+        if(son[u]==-1)  return;
+        dfs2(son[u],s);
+        for(int i=head[u];~i;i=edge[i].nex){
+            int v=edge[i].v;
+            if(v!=son[u]&&v!=fa[u]){
+                dfs2(v,v);
+            }
+        }
+    }
+    void update(int x,int y,int z)
+    {
+        int fx=top[x],fy=top[y];
+        while(fx!=fy)
+        {
+            if(dep[fx]>dep[fy]){
+                IntervalTree::update(dfsid[fx],dfsid[x],z,1,n,1);
+                x=fa[fx];
+            }
+            else {
+                IntervalTree::update(dfsid[fy],dfsid[y],z,1,n,1);
+                y=fa[fy];
+            }
+            fx=top[x],fy=top[y];
+        }
+        int L=min(dfsid[x],dfsid[y]);
+        int R=max(dfsid[x],dfsid[y]);
+        IntervalTree::update(L,R,z,1,n,1);
+    }
+    ll query(int x,int y)
+    {
+        ll ans=0;
+        int fx=top[x],fy=top[y];
+        while(fx!=fy)
+        {
+            if(dep[fx]>dep[fy]){
+                ans+=IntervalTree::query(dfsid[fx],dfsid[x],1,n,1);
+                x=fa[fx];
+            }
+            else {
+                ans+=IntervalTree::query(dfsid[fy],dfsid[y],1,n,1);
+                y=fa[fy];
+            }
+            fx=top[x],fy=top[y];
+        }
+        int L=min(dfsid[x],dfsid[y]);
+        int R=max(dfsid[x],dfsid[y]);
+        ans+=IntervalTree::query(L,R,1,n,1);
+        return ans;
+    }
+}
+
+int main()
+{
+    #ifndef ONLINE_JUDGE
+        freopen("in.txt","r",stdin);
+    #endif // ONLINE_JUDGE
+    while(scanf("%d %d %d",&n,&m,&k)!=EOF)
+    {
+        init();
+        for(int i=1;i<=n;i++){
+            scanf("%d",&arr[i]);
+        }
+        for(int i=1;i<=m;i++){
+            int u,v;
+            scanf("%d %d",&u,&v);
+            addEdge(u,v);addEdge(v,u);
+        }
+
+        HLD::init();
+        HLD::dfs1(1,-1,1);
+        HLD::dfs2(1,1);
+        for(int i=1;i<=n;i++){
+            HLD::update(i,i,arr[i]);
+        }
+
+        for(int i=1;i<=k;i++){
+            char op;
+            int x,y,z;
+            scanf("%s",&op);
+            if(op=='Q'){
+                scanf("%d",&x);
+                printf("%I64d\n",HLD::query(x,x));
+            }
+            else if(op=='I'){
+                scanf("%d %d %d",&x,&y,&z);
+                HLD::update(x,y,z);
+            }
+            else if(op=='D'){
+                scanf("%d %d %d",&x,&y,&z);
+                HLD::update(x,y,-z);
+            }
+        }
+    }
+    return 0;
+}
+

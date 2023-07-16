@@ -1,0 +1,46 @@
+/*
+
+用途：求解一个字符串的最长回文子串长度。
+时间复杂度：O(n)
+
+*/
+const int maxn = 5e5 + 10;
+char tar[maxn], str[maxn << 1];
+int P[maxn << 1];//P[i]表示以tar[i]为中心，最长回文子串长度是P[i]（只求了一半）
+int toManacherStr(char tar[], char bas[]) {
+	int len = strlen(bas) * 2 + 1;
+	for (int i = 0, j = 0; i < len; i++) {
+		tar[i] = (i & 1) ? bas[j++] : '#';
+	}
+	//abc->#a#b#c#
+	return len;
+}
+int manacher(char tar[], char bas[]) {
+	int len = toManacherStr(tar, bas);
+	//r是最右回文边界，c是r对应的最左(即最长)回文中心，maxval是记录的最大回文半径
+	int r = -1, c = -1, maxval = 0;
+	for (int i = 0; i < len; i++) {
+		/*
+		    如果最右回文边界位于i的右边(r>i):
+		    如果i关于c的对称点ii(ii = 2 * c - i)的最长回文串的左边界位于最右回文串左边界的左边，p[i] = r - i < p[ii];因为如果， p[i]>r-i, 根据i和ii四值相等，以c为中心的回文串会更长， 即r会更大， 矛盾， 故不可能。
+
+		    如果i关于c的对称点ii(ii = 2 * c - i)的最长回文串的左边界位于最右回文串左边界的右边， p[i] = p[ii] < r - i。
+		    综上， p[i] = min(r-i, p[2*c-i]);
+		*/
+		if (r > i)P[i] = min(r - i, P[2 * c - i]);
+		// 挨个暴力计算
+		else P[i] = 1;
+		while (i + P[i] < len && i - P[i]>-1) {
+			if (tar[i + P[i]] == tar[i - P[i]])P[i]++;
+			else break;
+		}
+		//更新最右回文边界及其回文中心
+		if (i + P[i] > r) {
+			r = i + P[i];
+			c = i;
+		}
+		maxval = max(maxval, P[i]);
+	}
+	//得到的结果多计算了一个#号，故减去1即为最长回文子串的长度
+	return maxval - 1;
+}

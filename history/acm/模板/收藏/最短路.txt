@@ -1,0 +1,146 @@
+集训学最短路径问题目前学了两种算法，dijkstra 和 Floyd 。先说Floyd
+
+Floyd 其写法很简单，就是3层for循环，由于循环较多，因此也时间复杂度高，其核心思想就是map[i][j] = map[i][t] + map[t][j] ;在图里面找 i 点和 j 点的最短路径，如果存在一个中间点 t ，使得 i—>t 的距离加上 t -> j 的距离的和小于直接从 i -> j  的距离，则通过上面那个等式进行更新其距离值，然后重复上述操作。直到把所有的找完之后的值便是最小的值。
+
+而Dijkstra则相对时间复杂度上要降低很多，他是通过一个按路径长度的递增次序，逐步产生最短路径的算法。算法思想：设集合S存放已经求出的最短路径的终点，初始状态时，集合S中只有一个源点，不妨设为V0。以后每求得一条最短路径(V0,V1,…,Vk),就将Vk加入到集合S中，直到全部顶点都加入到集合S中。  即通过初始点不断的向能过连通的点找，每一次都找一个最短的加入其中，然后通过一个数组存起来。找到就更新标记，直到全部找完即所有的都是离初始点最短的路径。
+畅通工程续
+
+Time Limit : 3000/1000ms (Java/Other)   Memory Limit : 32768/32768K (Java/Other)
+Total Submission(s) : 8   Accepted Submission(s) : 2
+Problem Description
+某省自从实行了很多年的畅通工程计划后，终于修建了很多路。不过路多了也不好，每次要从一个城镇到另一个城镇时，都有许多种道路方案可以选择，而某些方案要比另一些方案行走的距离要短很多。这让行人很困扰。
+
+现在，已知起点和终点，请你计算出要从起点到终点，最短需要行走多少距离。
+ 
+
+Input
+本题目包含多组数据，请处理到文件结束。
+每组数据第一行包含两个正整数N和M(0<N<200,0<M<1000)，分别代表现有城镇的数目和已修建的道路的数目。城镇分别以0～N-1编号。
+接下来是M行道路信息。每一行有三个整数A,B,X(0<=A,B<N,A!=B,0<X<10000),表示城镇A和城镇B之间有一条长度为X的双向道路。
+再接下一行有两个整数S,T(0<=S,T<N)，分别代表起点和终点。
+ 
+
+Output
+对于每组数据，请在一行里输出最短需要行走的距离。如果不存在从S到T的路线，就输出-1.
+ 
+
+Sample Input
+3 3
+0 1 1
+0 2 3
+1 2 1
+0 2
+3 1
+0 1 1
+1 2
+ 
+
+Sample Output
+2
+-1
+ 
+Dijkstra算法
+
+[html] view plain copy print?
+#include<iostream>  
+#include<stdio.h>  
+#include<string.h>  
+using namespace std;  
+#define inf 9999999  
+int dis[250],map[250][250];  
+int vis[250];  
+int n,m;  
+int dij(int x,int y)  
+{  
+    for(int i=0; i<n; i++)  
+        dis[i]=map[x][i];  
+    memset(vis,0,sizeof(vis));  
+    vis[x]=1;  
+    dis[x]=0;   //注意这个、开始没注意到、  
+    int k=x;  
+    for(int i=1; i<n; i++)  
+    {  
+        int mmax=inf;  
+        for(int j=0; j<n; j++)   //每个的最短  
+        {  
+            if(!vis[j]&&dis[j]<mmax)  
+            {  
+                mmax=dis[j];  
+                k=j;  
+            }  
+        }  
+        vis[k]=1;  
+        for(int j=0; j<n; j++)   //更新  
+        {  
+            if(!vis[j]&&dis[j]>dis[k]+map[k][j])  
+                dis[j]=dis[k]+map[k][j];  
+        }  
+    }  
+    if(dis[y]==inf) return -1;  
+    else return dis[y];  
+}  
+int main()  
+{  
+    while(scanf("%d%d",&n,&m)!=EOF)  
+    {  
+        int a,b,v,d,f,num;  
+        for(int i=0; i<=n; i++)  
+            for(int j=0; j<=n; j++)  
+                map[i][j]=map[j][i]=inf;  
+        for(int i=0; i<m; i++)  
+        {  
+            cin>>a>>b>>v;  
+            if(map[a][b]>v)  
+                map[a][b]=map[b][a]=v;  
+        }  
+        cin>>d>>f;  
+        num=dij(d,f);  
+        cout<<num<<endl;  
+    }  
+    return 0;  
+}  
+
+Floyd 算法
+
+[html] view plain copy print?
+#include<iostream>  
+#include<stdio.h>  
+using namespace std;  
+#define inf 9999999  
+int map[250][250];  
+int n,m;  
+int Floyd(int x,int y)  
+{  
+    int t,i,j;  
+    for(t=0;t<n;t++)  
+        for(i=0;i<n;i++)  
+            for(j=0;j<n;j++)  
+            if(map[i][j]>map[i][t]+map[t][j])    
+            {  
+                map[i][j]=map[i][t]+map[t][j];  
+            }  
+    if(map[x][y]==inf) return -1;  
+    else return map[x][y];  
+}  
+int main()  
+{  
+    while(scanf("%d%d",&n,&m)!=EOF)  
+    {  
+        int a,b,v,d,f,num;  
+        for(int i=0; i<=n; i++)  
+            for(int j=0; j<=n; j++)  
+                map[i][j]=map[j][i]=inf;  
+        for(int i=0;i<n;i++)  //注意同一点的权值为0，刚开始wa在这儿  
+        map[i][i]=0;  
+        for(int i=0; i<m; i++)  
+        {  
+            cin>>a>>b>>v;  
+            if(map[a][b]>v)  
+                map[a][b]=map[b][a]=v;  
+        }  
+        cin>>d>>f;  
+        num=Floyd(d,f);  
+        cout<<num<<endl;  
+    }  
+    return 0;  
+}  

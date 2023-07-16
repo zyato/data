@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+using namespace std;
+const int maxn = 100005;
+int nxt[maxn];
+void getnxt(string s) {
+	int n = s.length();
+	int i = 0, j = -1;
+	nxt[0] = -1;
+	while (i < n) {
+		if (j == -1 || s[i] == s[j]) {
+			nxt[++i] = ++j;
+		}
+		else j = nxt[j];
+	}
+}
+int kmp(string str, string s) {
+	int i = 0, j = 0, lena = str.length(), lenb = s.length();
+	getnxt(s);
+	//str.length()返回值是size_t(unsigned int)， 和int比较大小时，会把int类型变量转化为size_t,
+	//如果int 的值为负，结果很大，就很尴尬，特别是j能等于-1.
+	while (i < lena && j < lenb) {
+		if (j == -1 || str[i] == s[j]) {
+			i++;
+			j++;
+		}
+		else j = nxt[j];
+	}
+	if (j == s.length()) return i - j;//查找成功，返回str串在s中首次出现的首位置。
+	else return -1;//查找失败。
+}
+int main() {
+	string str, s;
+	while (cin >> str >> s) {
+		cout << str << " " << s << endl;
+		cout << kmp(str, s) << endl;
+		for (int i = 0; i <= s.length(); ++i)cout << nxt[i] << "  "; cout << endl;
+	}
+	return 0;
+}

@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+using namespace std;
+struct Permutation {
+    vector<string> ans; // 存储生成的所有排列。
+    string s; // 需要生成排列的字符串
+    // isvisit函数用于去重
+    bool isvisit(int st, int end) {
+        for (int i = st; i < end; i++) if (s[i] == s[end]) return true;
+        return false;
+    }
+    void dfs(int cur, int n) {
+        if (cur == n) {
+            ans.emplace_back(s);
+            return;
+        }
+        for (int i = cur; i < n; i++) {
+            // 如果s[cur]在[cur, i)之间已经和s[i]这个数值交换过，就无需交换了。
+            if (isvisit(cur, i)) continue;
+            swap(s[i], s[cur]);
+            // 简化后需要添加此代码。
+            dfs(cur + 1, n);
+            /* // 使用此种方式为了使生成的全排列从小到大。不过这种方式可以简化，
+               // 不用每次修改后就回溯。只需在for循环执行完成后，再把字符串回溯到初识状态即可。
+            for (int j = i; j > cur + 1; j--) swap(s[j], s[j - 1]);
+            dfs(cur + 1, n);
+            for (int j = cur + 1; j < i; j++) swap(s[j], s[j + 1]);
+            swap(s[i], s[cur]); 
+            */
+        }
+        // 简化后需要添加这三行代码。
+        int t = s[cur];
+        for (int i = cur + 1; i < n; i++) s[i - 1] = s[i];
+        s[n - 1] = t;
+    }
+    void permutation() {
+        s = "122";
+        ans.clear(); 
+        dfs(0, s.length());
+    }
+};
+int main(){
+
+    Permutation p;
+    p.permutation();
+    //for (string& s : p.ans) cout << s << endl;
+
+
+    return 0;
+}

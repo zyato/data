@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+using namespace std;
+const int maxn = 6000;
+struct node {
+	int u, v, val;
+}eg[maxn];
+int dist[maxn];
+bool BellmanFord(int s, int n, int m) {
+	//s是起始点，n是节点（1，2，……，n）, m是边数（从1开始）
+	bool change;
+	memset(dist, 0x3f, sizeof(dist)); //s到其他点的距离
+	dist[s] = 0; //s到s是0
+	for (int i = 1; i < n; i++) {
+		change = false;
+		for (int j = 1; j <= m; j++) {
+			if (dist[eg[j].v] > dist[eg[j].u] + eg[j].val) {
+				dist[eg[j].v] = dist[eg[j].u] + eg[j].val;
+				change = true;
+			}
+		}
+		if (!change) {
+			break;
+		}
+	}
+	for (int i = 1; i <= m; i++) {
+		//如果仍能松弛，则图中存在负环（true）
+			if (dist[eg[i].v]  > dist[eg[i].u] + eg[i].val) return true;
+	}
+	return false;
+}

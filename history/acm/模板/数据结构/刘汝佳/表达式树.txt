@@ -1,0 +1,113 @@
+#include <cmath>
+#include <cstdio>
+#include <string>
+#include <cstring>
+#include <iostream>
+
+using namespace std;
+const int maxn=1000+5;
+char s[maxn];
+int n,nc=0,fla=0;
+int rch[maxn],lch[maxn];
+string w[maxn],op[maxn];
+
+struct node{
+    int flag;
+    double ans;
+    node(int x,double y):flag(x),ans(y){}
+};
+
+int storage(){
+    int cnt=0;
+    for(int i=0;i<n;++i){
+        if(s[i]=='+'||s[i]=='-'||s[i]=='*'||s[i]=='/'||s[i]==')'||s[i]=='(')
+            w[cnt++]=s[i];
+        else {
+            w[cnt]="";
+            while(s[i]>='0'&&s[i]<='9'||s[i]=='.'){
+                w[cnt]+=s[i++];
+            }
+            ++cnt;
+            --i;
+        }
+    }
+    return cnt;
+}
+
+double change(string p){
+    fla=0;
+    double ans=0;
+    int h=0,len=p.size();
+    for(int i=0;i<len;++i){
+        if(p[i]=='.') {
+            h=i;
+            continue;
+        }
+        ans=ans*10+(p[i]-'0');
+    }
+    if(h!=0) {
+        fla=1;
+        return ans/pow(10,len-h-1);
+    }
+    return ans;
+}
+int build_tree(int x,int y){
+    int u,c1=-1,c2=-1,p=0;
+    if(y-x==1){
+        u=++nc;
+        lch[u]=rch[u]=0;
+        op[u]=w[x];
+        return u;
+    }
+    for(int i=x;i<y;++i){
+        if(w[i]=="("){
+            p++;
+        } else if (w[i]==")"){
+            p--;
+        } else if (w[i]=="+"||w[i]=="-"){
+            if(!p) c1=i;
+        } else if (w[i]=="*"||w[i]=="/"){
+            if(!p) c2=i;
+        }
+    }
+    if(c1<0) c1=c2;
+    if(c1<0) return build_tree(x+1,y-1);
+    u=++nc;
+    lch[u]=build_tree(x,c1);
+    rch[u]=build_tree(c1+1,y);
+    op[u]=w[c1];
+    return u;
+}
+node solve(int u){
+
+    if(lch[u]==0&&rch[u]==0) {
+        double v=change(op[u]);
+        return node(fla,v);
+    }
+    node p1=solve(lch[u]);
+    node p2=solve(rch[u]);
+    double ll=p1.ans,rr=p2.ans;
+    fla=0;
+    if(p1.flag||p2.flag) fla=1;
+    if(op[u]=="+") return node(fla,ll+rr);
+    if(op[u]=="-") return node(fla,ll-rr);
+    if(op[u]=="*") return node(fla,ll*rr);
+    if(op[u]=="/") {
+        if(fla){
+            return node(fla,ll/rr);
+        } else {
+            int a=ll,b=rr;
+            return node(fla,a/b);
+        }
+    }
+}
+int main(){
+    while(scanf("%s",s)==1){
+        nc=0;
+        n=strlen(s);
+        n=storage();
+        int root=build_tree(0,n);
+        printf("%.2f\n",solve(root).ans);
+    }
+    return 0;
+}

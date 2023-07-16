@@ -1,0 +1,75 @@
+/*
+数据结构：树状数组
+用途：前缀和查询（或者区间和查询）以及单点更新
+时间复杂度：单次查询或者更新时间复杂度均为O(log(n))。
+时间：2020年7月30日 11:35:13
+*/
+#include<cstdio>
+#include<cstring>
+const int maxn = 5e4 + 10;
+int arr[maxn]; // 下标从1开始
+int C[maxn]; // 下标从1开始
+/* c数组的理解
+C[i] 存原数组的部分数值的和
+C[i] 所存具体的几项：[[[
+			C[i] = A[i - 2^k+1] + A[i - 2^k+2] + ... + A[i];
+			//k为i的二进制中从最低位到高位连续零的长度
+			 ]]]
+					把i转化为2进制位，然后把最低二进制位1移动到最低位，此时值为x；
+					C[i] = a[x] + a[x + 1] + ... + a[i];
+					例如：C[56], 56 = 111000, x = 110001
+						  所以 C[56] = a[110001] + a[110010] + a[110011] + ... + a[111000];
+						  即是 C[56] = a[49] + a[50] + a[51] + ... + a[56];
+*/
+void init() { // 初始化
+	memset(arr, 0, sizeof(arr)); // 初始化，不能删
+	memset(C, 0, sizeof(C)); // 初始化，不能删
+}
+
+int lowbit(int x) { // 查找x的二进制位，最低位1的位置。返回值为这个位置所代表的数00000x000
+	return x & (-x);
+}
+/*
+	sum[i] = C[i] + C[i - 2^k1] + C[(i - 2^k1) - 2^k2] + ...
+	其中 kj 代表 i 的二进制表示，从低位开始，第 j 个 1 后面的位数。
+	例如： 6 = 110(2)
+		   sum[6] = C[6] + C[6 - 2^1] + C[6 - 2^1 - 2^2] = C[6] + C[4];
+*/
+int getSum(int x) { // 查询前缀和
+	int ans = 0;
+	while (x > 0) {
+		ans += C[x];
+		x -= lowbit(x);
+	}
+	return ans;
+}
+
+void update(int x, int value, int n) {
+	arr[x] += value; // 更新原始数组，可能不需要原始数组的值
+	while (x <= n) { // 更新C数组。
+		C[x] += value;
+		x += lowbit(x);
+	}
+}
+
+int main() {
+	freopen("in.txt", "r", stdin);
+	int T, n, a, b, rnd = 1; scanf("%d", &T);
+	char str[10];
+	while (T--) {
+		init();
+		scanf("%d", &n);
+		for (int i = 1; i <= n; i++) {
+			scanf("%d", &arr[i]);		// 下标从1开始。
+			update(i, arr[i], n);		//输入的过程就是更新的过程 
+		}
+		printf("Case %d:\n", rnd++);
+		while(~scanf(" %s", str) && str[0] != 'E') {	
+			scanf("%d%d", &a, &b);
+			if (str[0] == 'A') update(a, b, n);
+			if (str[0] == 'S') update(a, -b, n);
+			if (str[0] == 'Q') printf("%d\n", getSum(b) - getSum(a - 1)); // 这里求取的是区间和。
+		}
+	}
+	return 0;
+}

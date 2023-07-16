@@ -1,0 +1,26 @@
+//线性筛法求莫比乌斯函数
+bool check[maxn];
+int prime[maxn],mu[maxn];
+void Moblus(int n)
+{
+    mu[1]=1;
+    int tot=0;
+    cls(check);
+    for(int i=2;i<=n;i++){
+        if(!check[i]){
+            prime[tot++]=i;
+            mu[i]=-1;
+        }
+        for(int j=0;j<tot;j++){
+            if(i*prime[j]>n) break;
+            check[i*prime[j]]=true;
+            if(i%prime[j]==0){
+                mu[i*prime[j]]=0;
+                break;
+            }
+            else {
+                mu[i*prime[j]]=-mu[i];
+            }
+        }
+    }
+}

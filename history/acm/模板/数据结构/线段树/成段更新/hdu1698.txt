@@ -1,0 +1,122 @@
+Just a Hook
+
+Time Limit: 4000/2000 MS (Java/Others)    Memory Limit: 32768/32768 K (Java/Others)
+Total Submission(s): 36463    Accepted Submission(s): 17782
+
+
+Problem Description
+In the game of DotA, Pudge’s meat hook is actually the most horrible thing for most of the heroes. The hook is made up of several consecutive metallic sticks which are of the same length.
+
+
+
+
+Now Pudge wants to do some operations on the hook.
+
+Let us number the consecutive metallic sticks of the hook from 1 to N. For each operation, Pudge can change the consecutive metallic sticks, numbered from X to Y, into cupreous sticks, silver sticks or golden sticks.
+The total value of the hook is calculated as the sum of values of N metallic sticks. More precisely, the value for each kind of stick is calculated as follows:
+
+For each cupreous stick, the value is 1.
+For each silver stick, the value is 2.
+For each golden stick, the value is 3.
+
+Pudge wants to know the total value of the hook after performing the operations.
+You may consider the original hook is made up of cupreous sticks.
+ 
+
+Input
+The input consists of several test cases. The first line of the input is the number of the cases. There are no more than 10 cases.
+For each case, the first line contains an integer N, 1<=N<=100,000, which is the number of the sticks of Pudge’s meat hook and the second line contains an integer Q, 0<=Q<=100,000, which is the number of the operations.
+Next Q lines, each line contains three integers X, Y, 1<=X<=Y<=N, Z, 1<=Z<=3, which defines an operation: change the sticks numbered from X to Y into the metal kind Z, where Z=1 represents the cupreous kind, Z=2 represents the silver kind and Z=3 represents the golden kind.
+ 
+
+Output
+For each case, print a number in a line representing the total value of the hook after the operations. Use the format in the example.
+ 
+
+Sample Input
+1
+10
+2
+1 5 2
+5 9 3
+ 
+
+Sample Output
+Case 1: The total value of the hook is 24.
+
+题目大意：修改[a,b]区间的值为c，经过q次更改后求[1,n]区间的和。
+
+题目分析：update:成段替换 (由于只query一次总区间,所以可以直接输出1结点的信息)
+
+代码：
+#include <cmath>
+#include <vector>
+#include <stdio.h>
+#include <iostream>
+
+using namespace std;
+#define lson l,m,rt<<1
+#define rson m+1,r,rt<<1|1
+const int maxn=100000;
+int Case,n,q,a,b,c;
+int sum[maxn<<2],col[maxn<<2];
+
+void PushUp(int rt)
+{
+    sum[rt]=sum[rt<<1]+sum[rt<<1|1];
+}
+
+void PushDown(int rt,int m)
+{
+    if(col[rt]){
+        col[rt<<1]=col[rt<<1|1]=col[rt];
+        sum[rt<<1]=(m-(m>>1))*col[rt];
+        sum[rt<<1|1]=(m>>1)*col[rt];
+        col[rt]=0;
+    }
+}
+
+void build(int l,int r,int rt)
+{
+    col[rt]=0;
+    sum[rt]=1;
+    if(l==r){
+        return;
+    }
+    int m=(l+r)>>1;
+    build(lson);
+    build(rson);
+    PushUp(rt);
+}
+
+void update(int L,int R,int c,int l,int r,int rt)
+{
+    if(L<=l&&r<=R){
+        col[rt]=c;
+        sum[rt]=c*(r-l+1);
+        return;
+    }
+    PushDown(rt,r-l+1);
+    int m=(l+r)>>1;
+    if(L<=m)    update(L,R,c,lson);
+    if(R>m)     update(L,R,c,rson);
+    PushUp(rt);
+}
+
+int main()
+{
+//    freopen("in.txt","r",stdin);
+//    freopen("out.txt","w",stdout);
+    ios::sync_with_stdio(false);
+    cin>>Case;
+    for(int i=1;i<=Case;i++){
+        cin>>n>>q;
+        build(1,n,1);
+        for(int j=1;j<=q;j++){
+            cin>>a>>b>>c;
+            update(a,b,c,1,n,1);
+        }
+        cout<<"Case "<<i<<": The total value of the hook is "<<sum[1]<<"."<<endl;
+    }
+    return 0;
+}

@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+typedef long long ll;
+const int mod=1e9+7;
+const int maxn=1e5+100;
+ll fac[maxn+5];		//阶乘
+ll inv[maxn+5];		//逆元
+
+ll poww(ll a,ll b)
+{
+	ll res = 1;
+	while (b)
+	{
+		if (b&1)
+			res = res * a % mod;
+		a = a*a % mod;
+		b >>= 1;
+	}
+	return res;
+}
+
+void getFac()
+{
+	//inv[i] = 1LL * (MOD - MOD / i) * inv[MOD % i] % MOD;
+	fac[0] = inv[0] = 1;
+	for (int i = 1 ; i <= maxn ; i++){
+		fac[i] = fac[i-1] * i % mod;
+		inv[i] = poww(fac[i],mod-2);		//表示i的阶乘的逆元
+	}
+}
+
+ll C(ll n,ll m)		//C(n,m) = n!/((n-m)!*m!) % (1e9+7)
+{
+	return fac[n] * inv[n-m] % mod * inv[m] % mod;
+}
+
+int main()
+{
+    ll n,m;
+	getFac();
+	while (~scanf ("%lld %lld",&n,&m))
+    {
+		printf ("%lld\n",C(n,m));
+    }
+	return 0;
+}

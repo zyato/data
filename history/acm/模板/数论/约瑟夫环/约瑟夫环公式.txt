@@ -1,0 +1,20 @@
+#include <iostream>
+
+using namespace std;
+int main()
+{
+    //freopen("in.txt","r",stdin);
+    //freopen("out.txt","w",stdout);
+    int n,k,m;
+    while(cin>>n>>k>>m)
+    {
+        if(n==0&&k==0&&m==0)    break;
+        int s=0;
+        for(int i=2;i<=n;i++){
+            if(i<n) s=(s+k)%i;
+            else s=(s+m)%i;
+        }
+        cout<<s+1<<endl;
+    }
+    return 0;
+}

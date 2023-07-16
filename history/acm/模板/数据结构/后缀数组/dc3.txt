@@ -1,0 +1,68 @@
+namespace Suffix {
+    int wa[maxn],wb[maxn],wv[maxn],wt[maxn];
+    #define F(x) ((x)/3+((x)%3==1?0:tb))
+    #define G(x) ((x)<tb?(x)*3+1:((x)-tb)*3+2)
+    int c0(int r[], int a, int b)
+    {
+        return r[a]==r[b] && r[a+1]==r[b+1] && r[a+2]==r[b+2];
+    }
+    int c12(int k, int r[], int a, int b)
+    {
+        if(k==2)    return r[a]<r[b] || (r[a]==r[b] && c12(1,r,a+1,b+1));
+        else        return r[a]<r[b] || (r[a]==r[b] && wv[a+1]<wv[b+1]);
+    }
+    void wtort(int r[], int a[], int b[], int n, int m){
+        int i;
+        for(i = 0; i < n; ++i)  wv[i] = r[a[i]];
+        for(i = 0; i < m; ++i)  wt[i] = 0;
+        for(i = 0; i < n; ++i)  ++wt[wv[i]];
+        for(i = 1; i < m; ++i)  wt[i] += wt[i-1];
+        for(i = n-1; i >= 0; --i)  b[--wt[wv[i]]] = a[i];
+    }
+    void dc3(int r[], int sa[], int n, int m){
+        int i, j, *rn = r+n, *san = sa+n, ta=0, tb=(n+1)/3, tbc=0, p;
+        r[n] = r[n+1] = 0;
+        for(i = 0; i < n; ++i)
+            if(i%3!=0)  wa[tbc++] = i;
+        wtort(r+2, wa, wb, tbc, m);
+        wtort(r+1, wb, wa, tbc, m);
+        wtort(r, wa, wb, tbc, m);
+        rn[F(wb[0])] = 0;  p = 1;
+        for(i = 1; i < tbc ; ++i)   rn[F(wb[i])] = c0(r, wb[i-1], wb[i]) ? p-1 : p++;
+        if(p < tbc)
+            dc3(rn, san, tbc, p);
+        else
+            for(i=0;i<tbc;i++)
+                san[rn[i]] = i;
+        for(i = 0; i < tbc; ++i)
+            if(san[i]<tb)
+                wb[ta++] = san[i]*3;
+        if(n%3==1)
+            wb[ta++]=n-1;
+        wtort(r, wb, wa, ta, m);
+        for(i = 0; i < tbc; ++i)
+            wv[wb[i] = G(san[i])] = i;
+        for(i=0,j=0,p=0; i<ta && j<tbc; p++)
+            sa[p] = c12(wb[j]%3, r, wa[i], wb[j]) ? wa[i++] : wb[j++];
+        while(i < ta)
+            sa[p++] = wa[i++];
+        while(j < tbc)
+            sa[p++] = wb[j++];
+    }
+    void getheight(int *r,int* sa,int n)
+    {
+        int i,j,k=0;
+        for(i=1; i<=n; i++)  Rank[sa[i]]=i;
+        for(i=0; i<n; i++)
+        {
+            if(k)
+                k--;
+            else
+                k=0;
+            j=sa[Rank[i]-1];
+            while(r[i+k]==r[j+k])
+                k++;
+            height[Rank[i]-1]=k;
+        }
+    }
+};

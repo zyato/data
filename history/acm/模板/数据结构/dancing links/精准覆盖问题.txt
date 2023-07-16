@@ -1,0 +1,135 @@
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+
+using namespace std;
+
+#define maxn    5000
+#define maxnode 600000
+#define clr(x) memset(x,0,sizeof(x))
+#define clrlow(x) memset(x,-1,sizeof(x))
+
+struct DLX{
+    int n,m,ansed,Size;
+    int S[maxn],H[maxn],ans[maxn];
+    int U[maxnode],D[maxnode],L[maxnode],R[maxnode],col[maxnode],row[maxnode];
+    void init(int _n,int _m)
+    {
+        n=_n;
+        m=_m;
+        for(int i=0;i<=m;i++){
+            U[i]=i;
+            D[i]=i;
+            L[i]=i-1;
+            R[i]=i+1;
+            col[i]=i;
+            row[i]=0;
+        }
+        L[0]=m;
+        R[m]=0;
+        Size=m;
+        clrlow(H);
+        clr(ans);
+        clr(S);
+        ansed=-1;
+        return ;
+    }
+    void push(int r,int c){
+        Size++;
+        D[Size]=D[c];
+        U[Size]=c;
+        U[D[c]]=Size;
+        S[c]++;
+        D[c]=Size;
+        row[Size]=r;
+        col[Size]=c;
+        if(H[r]<0){
+            H[r]=Size;
+            R[Size]=L[Size]=Size;
+        }
+        else{
+            L[Size]=H[r];
+            R[Size]=R[H[r]];
+            L[R[H[r]]]=Size;
+            R[H[r]]=Size;
+        }
+    }
+    void del(int c)
+    {
+        S[col[c]]--;
+        R[L[c]]=R[c];
+        L[R[c]]=L[c];
+        for(int i=D[c];i!=c;i=D[i]){
+            for(int j=R[i];j!=i;j=R[j]){
+                S[col[j]]--;
+                D[U[j]]=D[j];
+                U[D[j]]=U[j];
+            }
+        }
+        return ;
+    }
+    void reback(int c)
+    {
+        for(int i=U[c];i!=c;i=U[i]){
+            for(int j=L[i];j!=i;j=L[j]){
+                D[U[j]]=j;
+                U[D[j]]=j;
+                S[col[j]]++;
+             }
+        }
+        S[col[c]]++;
+        R[L[c]]=c;
+        L[R[c]]=c;
+        return ;
+    }
+    void dancing(int dep)
+    {
+        if(ansed!=-1&&ansed<=dep){
+            return ;
+        }
+        if(R[0]==0){
+            ansed=dep;
+            return ;
+        }
+        int c=R[0];
+        for(int i=R[0]; i!=0; i=R[i]){
+            if(S[i]<S[c]) {
+                c=i;
+            }
+        }
+        del(c);
+        for(int i=D[c];i!=c;i=D[i]){
+            ans[dep]=row[i];
+            for(int j=R[i];j!=i;j=R[j])
+                del(col[j]);
+            dancing(dep+1);
+            for(int j=L[i];j!=i;j=L[j])
+                reback(col[j]);
+        }
+        reback(c);
+    }
+}dlx;
+
+int main()
+{
+    int n,m,p,x1,y1,x2,y2,T;
+//    freopen("in.txt","r",stdin);
+    scanf("%d",&T);
+    while(T--)
+    {
+        scanf("%d%d%d",&n,&m,&p);
+        dlx.init(p,n*m);
+        for(int i=1;i<=p;i++){
+            scanf("%d%d%d%d",&x1,&y1,&x2,&y2);
+            for(int r=x1+1;r<=x2;r++){
+                for(int c=y1+1;c<=y2;c++){
+                    dlx.push(i,(r-1)*m+c);
+                }
+            }
+        }
+        dlx.ansed=-1;
+        dlx.dancing(0);
+        printf("%d\n",dlx.ansed);
+    }
+    return 0;
+ }

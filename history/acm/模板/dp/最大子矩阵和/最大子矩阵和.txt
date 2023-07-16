@@ -1,0 +1,53 @@
+#include <iostream>
+
+using namespace std;
+typedef long long LL;
+const LL maxn=1000;
+LL row,col;
+LL b[maxn],rec[maxn][maxn];
+
+LL maxSubArray()
+{
+    LL ans=0,sum=0;
+    for(LL i=1;i<=col;i++){
+        if(sum>0){
+            sum+=b[i];
+        } else {
+            sum=b[i];
+        }
+        ans=max(ans,sum);
+    }
+    return ans;
+}
+
+LL maxSubMatrix()
+{
+    LL ans=0;
+    for(LL i=1;i<=row;i++){
+        for(LL j=1;j<=col;j++){
+            b[j]=0;
+        }
+        for(LL j=i;j<=row;j++){
+            for(LL k=1;k<=col;k++){
+                b[k]+=rec[j][k];
+            }
+            LL sum=maxSubArray();
+            ans=max(ans,sum);
+        }
+    }
+    return ans;
+}
+
+int main()
+{
+    while(cin>>col>>row)
+    {
+        for(LL i=1;i<=row;i++){
+            for(LL j=1;j<=col;j++){
+                cin>>rec[i][j];
+            }
+        }
+        cout<<maxSubMatrix()<<endl;
+    }
+    return 0;
+}

@@ -1,0 +1,138 @@
+A Simple Problem with Integers
+Time Limit: 5000MS		Memory Limit: 131072K
+Total Submissions: 121600		Accepted: 37748
+Case Time Limit: 2000MS
+Description
+
+You have N integers, A1, A2, ... , AN. You need to deal with two kinds of operations. One type of operation is to add some given number to each number in a given interval. The other is to ask for the sum of numbers in a given interval.
+
+Input
+
+The first line contains two numbers N and Q. 1 ≤ N,Q ≤ 100000.
+The second line contains N numbers, the initial values of A1, A2, ... , AN. -1000000000 ≤ Ai ≤ 1000000000.
+Each of the next Q lines represents an operation.
+"C a b c" means adding c to each of Aa, Aa+1, ... , Ab. -10000 ≤ c ≤ 10000.
+"Q a b" means querying the sum of Aa, Aa+1, ... , Ab.
+
+Output
+
+You need to answer all Q commands in order. One answer in a line.
+
+Sample Input
+
+10 5
+1 2 3 4 5 6 7 8 9 10
+Q 4 4
+Q 1 10
+Q 2 4
+C 3 6 3
+Q 2 4
+Sample Output
+
+4
+55
+9
+15
+Hint
+
+The sums may exceed the range of 32-bit integers.
+Source
+
+POJ Monthly--2007.11.25, Yang Yi
+
+题目大意：现在有两种操作，C:给第a个到第b个的所有数加上c，Q：查询第a个到第b个数的和
+
+题目分析：update:成段增减 query:区间求和
+
+代码：
+#include <cmath>
+#include <vector>
+#include <stdio.h>
+#include <iostream>
+
+using namespace std;
+#define LL long long
+#define lson l,m,rt<<1
+#define rson m+1,r,rt<<1|1
+const int maxn=100000;
+int n,q,a,b,c;
+LL sum[maxn<<2],add[maxn<<2];
+
+void PushUp(int rt)
+{
+    sum[rt]=sum[rt<<1]+sum[rt<<1|1];
+}
+
+void PushDown(int rt,int m)
+{
+    if(add[rt]){
+        add[rt<<1]+=add[rt];
+        add[rt<<1|1]+=add[rt];
+        sum[rt<<1]+=(m-(m>>1))*add[rt];
+        sum[rt<<1|1]+=(m>>1)*add[rt];
+        add[rt]=0;
+    }
+}
+
+void build(int l,int r,int rt)
+{
+    add[rt]=0;
+    if(l==r){
+        cin>>sum[rt];
+        return;
+    }
+    int m=(l+r)>>1;
+    build(lson);
+    build(rson);
+    PushUp(rt);
+}
+
+void update(int L,int R,int c,int l,int r,int rt)
+{
+    if(L<=l&&r<=R){
+        add[rt]+=c;
+        sum[rt]+=c*(r-l+1);
+        return;
+    }
+    PushDown(rt,r-l+1);
+    int m=(l+r)>>1;
+    if(L<=m)    update(L,R,c,lson);
+    if(R>m)     update(L,R,c,rson);
+    PushUp(rt);
+}
+
+LL query(int L,int R,int l,int r,int rt)
+{
+    if(L<=l&&r<=R){
+        return sum[rt];
+    }
+    PushDown(rt,r-l+1);
+    LL ans=0;
+    int m=(l+r)>>1;
+    if(L<=m) ans+=query(L,R,lson);
+    if(R>m)  ans+=query(L,R,rson);
+    return ans;
+}
+
+int main()
+{
+//    freopen("in.txt","r",stdin);
+//    freopen("out.txt","w",stdout);
+    ios::sync_with_stdio(false);
+    while(cin>>n>>q)
+    {
+        char ch;
+        build(1,n,1);
+        for(int j=1;j<=q;j++){
+            cin>>ch;
+            if(ch=='C'){
+                cin>>a>>b>>c;
+                update(a,b,c,1,n,1);
+            } else {
+                cin>>a>>b;
+                cout<<query(a,b,1,n,1)<<endl;
+            }
+        }
+    }
+    return 0;
+}

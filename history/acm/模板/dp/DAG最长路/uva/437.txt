@@ -1,0 +1,96 @@
+题目链接：uva437 
+
+题目大意：现在有n个长方体，每个长方体可以用任意次，要求选一些长方体摞成一根尽可能高的柱子（可以自行选择哪一条边作为高），并且要求下面长方体的长和宽严格大于上面的长方体的长和宽。
+
+
+
+题目分析：如果长方体x可以嵌套长方体y，就从x到y连一条有向边（权值为长方体的高），这样就会得到一个DAG（有向无环图），这样就把问题转化为了求DAG上的最长路。因为一个长方体的任意一条边都可以是高，那么建图时不妨把一个长方体当成三个长方体来建图，最后搜索出最长路。
+
+
+
+代码：
+
+
+[cpp] view plain copy
+#include <vector>  
+#include <stdio.h>  
+#include <string.h>  
+#include <iostream>  
+  
+using namespace std;  
+const int maxn=3000+100;  
+int d[maxn];  
+int n,cnt,ans;  
+vector<int>v[maxn];  
+  
+struct Rec{  
+    int l,w,h;  
+};  
+Rec rec[maxn];  
+  
+int dfs(int i)  
+{  
+    if(d[i])    return d[i];  
+    d[i]=rec[i].h;  
+    for(int j=0;j<(int)v[i].size();j++){  
+        int num=v[i][j];  
+        d[i]=max(d[i],dfs(num)+rec[i].h);  
+    }  
+    return d[i];  
+}  
+  
+void GreateGraph()  
+{  
+    for(int i=1;i<cnt;i++){  
+        v[i].clear();  
+    }  
+    for(int i=1;i<cnt;i++){  
+        for(int j=1;j<cnt;j++){  
+            if(rec[i].l>rec[j].l&&rec[i].w>rec[j].w){  
+                v[i].push_back(j);  
+            }  
+        }  
+    }  
+}  
+  
+void CreateRec(int a,int b,int c)  
+{  
+    rec[cnt].l=max(a,b);  
+    rec[cnt].w=min(a,b);  
+    rec[cnt].h=c;  
+    cnt++;  
+}  
+  
+void print()  
+{  
+    for(int i=1;i<cnt;i++){  
+        cout<<rec[i].l<<" "<<rec[i].w<<" "<<rec[i].h<<endl;  
+    }  
+}  
+  
+int main()  
+{  
+    //freopen("in.txt","r",stdin);  
+    //freopen("out.txt","w",stdout);  
+    int Case=0;  
+    while(cin>>n&&n)  
+    {  
+        cnt=1;  
+        ans=0;  
+        int a,b,c;  
+        for(int i=1;i<=n;i++){  
+            cin>>a>>b>>c;  
+            CreateRec(a,b,c);  
+            CreateRec(a,c,b);  
+            CreateRec(b,c,a);  
+        }  
+        GreateGraph();  
+        int ans=0;  
+        memset(d,0,sizeof(d));  
+        for(int i=1;i<cnt;i++){  
+            ans=max(ans,dfs(i));  
+        }  
+        cout<<"Case "<<++Case<<": maximum height = "<<ans<<endl;  
+    }  
+    return 0;  
+} 

@@ -1,0 +1,74 @@
+#include <cstdio>  
+#include <iostream>  
+#include <algorithm>  
+#include <cmath>  
+#include <cstring>  
+#define maxn 50  
+using namespace std;  
+int equ,var,a[maxn][maxn];  
+int Gauss()  
+{  
+    int max_r,col,k;  
+    for(k=0,col=0;k<equ&&col<var;k++,col++)  
+    {  
+        max_r=k;  
+        for(int i=k+1;i<equ;i++)  
+            if(a[i][col]>a[max_r][col])  
+            max_r=i;  
+        if(!a[max_r][col])  
+        {  
+            k--;  
+            continue;  
+        }  
+        if(max_r!=k)  
+        {  
+            for(int j=col;j<var+1;j++)  
+                swap(a[max_r][j],a[k][j]);  
+        }  
+        for(int i=k+1;i<equ;i++)  
+        {  
+            if(a[i][col])  
+                for(int j=col;j<var+1;j++)  
+                a[i][j]^=a[k][j];  
+        }  
+    }  
+    for(int i=k;i<equ;i++)  
+        if(a[i][col])  
+        return -1;  
+    if(k<var)  
+        return var-k;  
+    return 0;  
+}  
+int start[maxn],mend[maxn];  
+int main()  
+{  
+    int t,n,x,y;  
+    scanf("%d",&t);  
+    while(t--)  
+    {  
+        scanf("%d",&n);  
+        memset(a,0,sizeof(a));  
+        equ=n;  
+        var=n;  
+        for(int i=0;i<n;i++)  
+            scanf("%d",&start[i]);  
+        for(int i=0;i<n;i++)  
+            scanf("%d",&mend[i]);  
+        for(int i=0;i<n;i++)  
+            a[i][i]=1;  
+        while(~scanf("%d %d",&x,&y))  
+        {  
+            if(x==0&&y==0)  
+                break;  
+            a[y-1][x-1]=1;                                   //注意下标，看准是谁对谁的影响  
+        }  
+        for(int i=0;i<n;i++)  
+            a[i][n]=(start[i]^mend[i]);  
+        int t=Gauss();  
+        if(t==-1)  
+            printf("Oh,it's impossible~!!\n");  
+        else  
+            printf("%d\n",(1<<t));  
+    }  
+    return 0;  
+}

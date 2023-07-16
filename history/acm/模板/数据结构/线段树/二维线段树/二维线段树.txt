@@ -1,0 +1,93 @@
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+#define lson l,m,rt<<1
+#define rson m+1,r,rt<<1|1
+const int mod=1e9+7;
+const int maxn=1000+1;
+int n,m;
+long long sum[maxn<<2][maxn<<2];
+
+void build_col(int row,int l,int r,int rt)
+{
+    sum[row][rt]=0;
+    if(l==r)    return;
+    int m=(l+r)>>1;
+    build_col(row,lson);
+    build_col(row,rson);
+}
+
+void build_row(int l,int r,int rt)
+{
+    build_col(rt,1,n,1);
+    if(l==r)    return;
+    int m=(l+r)>>1;
+    build_row(lson);
+    build_row(rson);
+}
+
+void add_col(int row,int y,long long val,int l,int r,int rt)
+{
+    sum[row][rt]=(sum[row][rt]+val)%mod;
+    if(l==r)    return;
+    int m=(l+r)>>1;
+    if(y<=m)    add_col(row,y,val,lson);
+    else        add_col(row,y,val,rson);
+}
+
+void add_row(int x,int y,long long val,int l,int r,int rt)
+{
+    add_col(rt,y,val,1,n,1);
+    if(l==r)    return;
+    int m=(l+r)>>1;
+    if(x<=m)    add_row(x,y,val,lson);
+    else        add_row(x,y,val,rson);
+}
+
+long long query_col(int row,int y1,int y2,int l,int r,int rt)
+{
+    if(l==y1&&r==y2){
+        return sum[row][rt]%mod;
+    }
+    int m=(l+r)>>1;
+    if(y2<=m)   return query_col(row,y1,y2,lson)%mod;
+    else if(y1>m)   return query_col(row,y1,y2,rson)%mod;
+    return (query_col(row,y1,m,lson)+query_col(row,m+1,y2,rson))%mod;
+}
+
+long long query_row(int y1,int y2,int L,int R,int l,int r,int rt)
+{
+    if(L<=l&&r<=R){
+        return query_col(rt,y1,y2,1,n,1)%mod;
+    }
+    int m=(l+r)>>1;
+    if(R<=m)   return query_row(y1,y2,L,R,lson)%mod;
+    else if(L>m)  return query_row(y1,y2,L,R,rson)%mod;
+    return (query_row(y1,y2,L,m,lson)+query_row(y1,y2,m+1,R,rson))%mod;
+}
+
+int main()
+{
+    //freopen("in.txt","r",stdin);
+    //freopen("out.txt","w",stdout);
+    while(cin>>n>>m)
+    {
+        string str;
+        long long val;
+        int x1,y1,x2,y2;
+        build_row(1,n,1);
+        for(int i=0;i<m;i++){
+            cin>>str;
+            if(str=="Add"){
+                cin>>x1>>y1>>val;
+                add_row(x1+1,y1+1,val,1,n,1);
+            } else {
+                cin>>x1>>y1>>x2>>y2;
+                cout<<(query_row(y1+1,y2+1,x1+1,x2+1,1,n,1)%mod+mod)%mod<<endl;
+            }
+        }
+    }
+    return 0;
+}

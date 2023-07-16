@@ -1,0 +1,226 @@
+Doing Homework again
+
+Time Limit:1000/1000 MS (Java/Others)    Memory Limit: 32768/32768 K(Java/Others)
+Total Submission(s): 13863    Accepted Submission(s): 8041
+
+
+Problem Description
+
+Ignatius has just come back school from the 30thACM/ICPC. Now he has a lot of homework to do. Every teacher gives him adeadline of handing in the homework. If Ignatius hands in the homework afterthe deadline, the teacher will reduce his score of the final test. And now weassume that doing everyone homework always takes one day. So Ignatius wants youto help him to arrange the order of doing homework to minimize the reducedscore.
+
+ 
+
+ 
+
+Input
+
+The input contains several test cases. The first line ofthe input is a single integer T that is the number of test cases. T test casesfollow.
+Each test case start with a positive integer N(1<=N<=1000) which indicatethe number of homework.. Then 2 lines follow. The first line contains Nintegers that indicate the deadlines of the subjects, and the next linecontains N integers that indicate the reduced scores.
+
+ 
+
+ 
+
+Output
+
+For each test case, you should output the smallest totalreduced score, one line per test case.
+
+ 
+
+ 
+
+Sample Input
+
+3
+
+3
+
+3 3 3
+
+10 5 1
+
+3
+
+1 3 1
+
+6 2 3
+
+7
+
+1 4 6 4 2 4 3
+
+3 2 1 7 6 5 4
+
+ 
+
+ 
+
+Sample Output
+
+0
+
+3
+
+5
+
+ 
+
+ 
+
+题目大意：现在有n份作业，每份作业有分数和截止日期，如果作业在截止日期前未完成，则扣除它的分数，要求扣除的分数最小。
+
+ 
+
+ 
+
+题目分析：这是一道简单的不能简单的贪心题。只能说自己太low了，代码写了很多，还一直没过。。。首先我的思路是先按照截止日期排序，然后相同截止日期的按分数从高到低排序，然后依次把不能完成的作业的分数相加就行了，但是这样交上去发现wa了，后来想想发现当同一截止日期的作业，他们的分数很大，完全是可以代替前面的。所以中间想了几种方法，都wa了，最后用了数组去标记可以完成的作业（先不管是不是最优的），然后对于不能完成的作业，与前面的能够完成的作业进行比较，替代前面最小的那个作业。最后过了，但是觉得写的很复杂，所以看了下别人博客，发现大神直接按照分数排序，用一个数组存n天是否做了作业，
+
+然后对于每个作业的截止日期每次减一看是否哪天没做作业，如果每天都做了作业，则该作业分数为要减少的分数。
+
+ 
+
+代码：
+
+[cpp] view plain copy
+<span style="font-family:Microsoft YaHei;font-size:18px;">#include<iostream>  
+#include<algorithm>  
+#include<string.h>  
+   
+usingnamespacestd;  
+#definesize1050  
+   
+structstrc  
+{  
+      intdeadline, grade;  
+} str[size];  
+   
+bool cmp(strca,strcb)        //如果日期不同则按日期从小到大排序，相同则按分数高低排序  
+{  
+      if(a.deadline !=b.deadline)  
+      {  
+          returna.deadline<b.deadline;  
+      }  
+      else  
+      {  
+          returna.grade>b.grade;  
+      }  
+}  
+   
+int flag[size];  
+   
+int main()  
+{  
+      intt;  
+      cin>> t;  
+      while(t--)  
+      {  
+           memset(flag,0,sizeof(flag));            //0不能在截止日期前完成 1能完成  
+          intn, reduce = 0, day = 1;  
+           cin>> n;  
+          for(int i = 0; i<n; i++)  
+           {  
+                 cin>> str[i].deadline;  
+           }  
+          for(int i = 0; i<n; i++)  
+           {  
+                 cin>> str[i].grade;  
+           }  
+           sort(str,str + n, cmp);  
+          for(int i = 0; i<n; i++)       //先把能完成的作业标记为1  
+           {  
+                if(str[i].deadline >= day)  
+                 {  
+                      flag[i]= 1;  
+                     intj;  
+                     for(j = i + 1; j<n&&str[j].deadline == day; j++)  
+                      {  
+                            i= j;  
+                      }  
+                 }  
+                if(str[i].deadline != 0)  
+                      day++;  
+           }  
+          for(int i = 0; i<n; i++)       //对于不能完成的作业与前面能完成的作业分数比较，替代其中分数最小的那个  
+           {  
+                if(flag[i] == 0)  
+                 {  
+                     intk = i, min = str[i].grade;  
+                     for(int j = 0; j<i; j++)  
+                      {  
+                           if(str[k].grade>str[j].grade&&flag[j] == 1)  
+                            {  
+                                  min= str[j].grade;  
+                                  k= j;  
+                            }  
+                       }  
+                      reduce+= min;  
+                      str[k].deadline= str[i].deadline;  
+                      str[k].grade= str[i].grade;  
+                 }  
+           }  
+           cout<< reduce << endl;  
+      }  
+      return0;  
+}</span>  
+
+ps：自己洋洋洒洒写了80多行，虽说其中可以稍微优化一下，减少一下代码长度，但是觉得写得还是很复杂，最后附上大神的代码：
+
+[cpp] view plain copy
+<span style="font-family:Microsoft YaHei;font-size:18px;">#include<iostream>   
+#include<algorithm>   
+#include<cstring>   
+usingnamespace std;  
+   
+struct Node  
+{  
+    int time, fen;  
+} node[1005];  
+   
+int cmp(structNode a, structNode b)  
+{  
+    if (a.fen != b.fen)  
+        return a.fen >b.fen;//扣分越多的越靠前   
+    return a.time <b.time;//扣分相同的时候,deadline越早的越靠前   
+}  
+   
+int  visit[2010];//如果当天没用过,值为0；否则为1   
+   
+int main()  
+{  
+    int m;  
+    cin >>m;  
+    while (m--)  
+    {  
+        int n, i,j, ans= 0;  
+        memset(visit, 0, sizeof(visit));  
+        cin>> n;  
+        for (i = 0; i<n;i++)  
+        {  
+            cin>> node[i].time;  
+        }  
+        for (i = 0; i<n;i++)  
+        {  
+            cin>> node[i].fen;  
+        }  
+        sort(node, node +n, cmp);  
+        int sum = 0;  
+        for (i = 0; i<n;i++)  
+        {  
+            j =node[i].time;//从截止时间开始往前推,如果有一天没用过,这一天就做这一门课,这门课不扣分   
+            while (j)  
+            {  
+                if (!visit[j])  
+                {  
+                    visit[j] = 1;  
+                    break;  
+                }  
+                j--;  
+            }  
+            if (j == 0)//如果j=0,表明从time往前的每一天都被占用了,这门课完不成   
+                ans+= node[i].fen;  
+        }  
+        cout<< ans << endl;  
+    }  
+   
+    return 0;  
+}</span>

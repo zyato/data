@@ -1,0 +1,102 @@
+题目：N个点M条边的无向连通图，每条边有一个权值，求该图的最小生成树。
+
+
+输入
+
+第1行：2个数N,M中间用空格分隔，N为点的数量，M为边的数量。（2 <= N <= 1000, 1 <= M <= 50000)
+第2 - M + 1行：每行3个数S E W，分别表示M条边的2个顶点及权值。(1 <= S, E <= N，1 <= W <= 10000)
+
+输出
+
+输出最小生成树的所有边的权值之和。
+
+输入示例
+
+9 14
+1 2 4
+2 3 8
+3 4 7
+4 5 9
+5 6 10
+6 7 2
+7 8 1
+8 9 7
+2 8 11
+3 9 2
+7 9 6
+3 6 4
+4 6 14
+1 8 8
+
+输出示例
+
+37
+
+代码实现：
+
+
+[cpp] view plain copy
+<span style="font-family:Microsoft YaHei;font-size:18px;">#include <iostream>  
+#include <algorithm>  
+  
+using namespace std;  
+#define size 50050  
+  
+int father[size],son[size];  
+  
+struct Node{                //存储节点和边的长度  
+    int n1,n2,len;  
+}str[size];  
+  
+bool cmp(Node a,Node b)     //按边的长度从小到大排序  
+{  
+    return a.len<b.len;  
+}  
+  
+int unionsearch(int x)      //查找根节点以及路径压缩  
+{  
+    return x==father[x]?x:unionsearch(father[x]);  
+}  
+  
+bool IsCircle(int a,int b)  //判断是否为环  
+{  
+    int root1=unionsearch(a);  
+    int root2=unionsearch(b);  
+    if(root1==root2){  
+        return true;  
+    }  
+    if(son[root1]>=son[root2]){  
+        father[root2]=root1;  
+        son[root1]+=son[root2];  
+    }  
+    else{  
+        father[root1]=root2;  
+        son[root2]+=son[root1];  
+    }  
+    return false;  
+}  
+  
+int main()  
+{  
+    int n,m,times;  
+    long long sum=0;  
+    cin>>n>>m;  
+    times=n-1;  
+    for(int i=0;i<m;i++){  
+        cin>>str[i].n1>>str[i].n2>>str[i].len;  
+    }  
+    for(int i=0;i<n;i++){       //初始化  
+        father[i]=i;  
+        son[i]=1;  
+    }  
+    sort(str,str+m,cmp);        //排序  
+    for(int i=0;i<m&×i++){  
+        if(!IsCircle(str[i].n1,str[i].n2)){     //如果不为环则把此条边加入最小生成树中  
+            sum+=str[i].len;  
+            times--;  
+        }  
+    }  
+    cout<<sum<<endl;  
+    return 0;  
+}  
+</span>  
