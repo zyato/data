@@ -59,3 +59,37 @@ func search(nums []int, l, r, v int) int {
 	}
 	return r
 }
+
+// 全排列递归解法
+func fullPermutation(nums []int) [][]int {
+	// 如果需要去重，只需要保证cur位置针对同一个数只放一次即可。实现起来可以先升序排序nums，这样后面的位置和i位置一样的数直接跳过即可
+	sort.Ints(nums)
+	n := 1
+	for i := len(nums); i > 1; i-- {
+		n *= i
+	}
+	data := make([]int, len(nums))
+	res := make([][]int, 0, n)
+	vis := make([]bool, len(nums))
+	var dfs func(int)
+	dfs = func(cur int) {
+		if cur == len(nums) {
+			res = append(res, append([]int(nil), data...))
+			return
+		}
+		for i := 0; i < len(nums); i++ {
+			// 去重需要加上(i > 0 && !vis[i - 1] && nums[i] == nums[i - 1])这个条件，没有此条件表示不去重
+			// 表示如果在i-1位置放置过nums[i]，这次就直接跳过。
+			// 注意一定要加上!vis[i-1]，如果在i-1没有放置nums[i]，本次是第一次放置nums[i]不应该跳过，跳过会遗漏答案
+			if vis[i] || (i > 0 && !vis[i-1] && nums[i] == nums[i-1]) {
+				continue
+			}
+			data[cur] = nums[i]
+			vis[i] = true
+			dfs(cur + 1)
+			vis[i] = false
+		}
+	}
+	dfs(0)
+	return res
+}
