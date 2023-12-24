@@ -142,6 +142,8 @@ func download(musicData *MusicData) (string, error) {
 }
 
 func getMusicInfo(name, singer string) (MusicList, error) {
+	name = strings.TrimSpace(name)
+	singer = strings.TrimSpace(singer)
 	u := musicURL + fmt.Sprintf("?name=%s&br=14", name+singer)
 	r, err := http.Get(u)
 	if err != nil {

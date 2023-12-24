@@ -23,7 +23,7 @@ const (
 )
 
 const (
-	DownloadPath = "D:\\code\\vscode\\code\\music\\"
+	DownloadPath = "D:\\code\\src\\github.com\\zyato\\data\\vscode\\music\\"
 	Sep          = "###"
 )
 
@@ -60,17 +60,8 @@ func getAllFileNames(folderPath string) ([]string, error) {
 }
 
 // 根据names.txt音乐信息，转换成“歌名 歌手”的形式
-// 21海鸣威、吴琼:老人与海
 func AdaptSongInfo(line []byte) []byte {
-	ss := strings.Split(string(line), ":")
-	i := 0
-	for i = 0; i < len(ss[0]) && ss[0][i] >= '0' && ss[0][i] <= '9'; i++ {
-	}
-	if len(ss) == 1 {
-		ss = append(ss, ss[0])
-	}
-	if ss[1] == "" || ss[1] == " " {
-		ss[1] = ss[0][i:]
-	}
-	return []byte(ss[1] + Sep + ss[0][i:])
+	s := string(line)
+	s = strings.TrimSpace(s)
+	return []byte(s + Sep + " ")
 }
