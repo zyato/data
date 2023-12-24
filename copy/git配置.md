@@ -1,5 +1,4 @@
 ---
-Copy from: [Git 同时使用 Gitee 和 Github 并设置代理](https://duter2016.github.io/2021/01/22/Git%E5%90%8C%E6%97%B6%E4%BD%BF%E7%94%A8Gitee%E5%92%8CGithub%E5%B9%B6%E8%AE%BE%E7%BD%AE%E4%BB%A3%E7%90%86/)
 layout:     post
 title:     Git同时使用Gitee和Github并设置代理
 subtitle:   Linux中Git设置方法及Proxy设置
@@ -15,6 +14,7 @@ tags:
 
 # Git 同时使用 Gitee 和 Github 并设置代理
 
+> Copy from: [Git 同时使用 Gitee 和 Github 并设置代理](https://duter2016.github.io/2021/01/22/Git%E5%90%8C%E6%97%B6%E4%BD%BF%E7%94%A8Gitee%E5%92%8CGithub%E5%B9%B6%E8%AE%BE%E7%BD%AE%E4%BB%A3%E7%90%86/)  
 
 > **分别为Gitee 和 Github建立两个密钥，不同账号配置不同的密钥，为github和gitee仓库配置不同密钥。**
 
