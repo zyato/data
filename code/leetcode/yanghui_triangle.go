@@ -1,4 +1,4 @@
-package leetcode
+package main
 
 /*
     leetcode: https://leetcode.cn/problems/find-the-n-th-value-after-k-seconds/description/
