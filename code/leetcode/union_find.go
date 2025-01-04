@@ -8,14 +8,14 @@ type unionFind struct {
 	cc  int   // 连通分量
 }
 
-// [0, n]
+// [0, n)
 func newUnionFind(n int) *unionFind {
 	um := &unionFind{
-		f:   make([]int, n+1),
-		siz: make([]int, n+1),
-		cc:  n + 1,
+		f:   make([]int, n),
+		siz: make([]int, n),
+		cc:  n,
 	}
-	for i := 0; i <= n; i++ {
+	for i := 0; i < n; i++ {
 		um.f[i] = i
 		um.siz[i] = 1
 	}
