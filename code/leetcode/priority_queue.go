@@ -19,6 +19,14 @@ func newPair(first int, second ...int) elem {
 
 type priorityQueue []elem
 
+func newPriorityQueue(size ...int) priorityQueue {
+	var siz int
+	if len(size) > 0 {
+		siz = size[0]
+	}
+	return make(priorityQueue, 0, siz)
+}
+
 func (pq *priorityQueue) Len() int {
 	return len(*pq)
 }
