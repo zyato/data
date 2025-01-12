@@ -52,6 +52,10 @@ func (pq *priorityQueue) Pop() any {
 	return v
 }
 
+func (pq *priorityQueue) Empty() bool {
+	return len(*pq) == 0
+}
+
 func (pq *priorityQueue) push(v elem) {
 	heap.Push(pq, v)
 }
