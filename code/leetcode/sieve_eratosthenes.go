@@ -8,7 +8,7 @@ package main
 func sieveOfEratosthenes(n int) (isComposite []bool, primes []int) {
     isComposite = make([]bool, n + 1)
     for i := 2; i <= n; i++ {
-        if!isComposite[i] {
+        if !isComposite[i] {
             primes = append(primes, i)
             for j := i * i; j <= n; j += i {
                 isComposite[j] = true
