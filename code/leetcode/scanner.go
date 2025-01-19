@@ -6,6 +6,8 @@ import (
 	"strconv"
 )
 
+func main() {}
+
 var sc = newScanner()
 
 type scanner struct {
@@ -21,7 +23,11 @@ func newScanner() *scanner {
 }
 
 func (sc *scanner) gInt() int {
-	sc.Scan()
-	v, _ := strconv.Atoi(sc.Text())
+    v, _ := strconv.Atoi(sc.gStr())
 	return v
+}
+
+func (sc *scanner) gStr() string {
+    sc.Scan()
+    return sc.Text()
 }
