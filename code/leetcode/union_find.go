@@ -23,12 +23,10 @@ func newUnionFind(n int) *unionFind {
 }
 
 func (um *unionFind) find(v int) int {
-	t := v
-	for um.f[t] != t {
-		t = um.f[t]
+	if um.f[v] != v {
+		um.f[v] = um.find(um.f[v])
 	}
-	um.f[v] = t
-	return t
+	return v
 }
 
 func (um *unionFind) merge(x, y int) bool {
